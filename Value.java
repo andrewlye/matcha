@@ -35,13 +35,6 @@ public class Value{
         this.backward = () -> {};
     }
 
-    public Value(double data, List<Value> children, Backward backward){
-        this.data = data;
-        this.prev = children;
-        this.grad = 0.0;
-        this.backward = backward;
-    }
-
     public Value add(Value x){
         List<Value> children = new ArrayList<>();
         children.add(this);
@@ -61,6 +54,44 @@ public class Value{
 
         Value out = new Value(data * x.data(), children);
         Backward back = () -> {this.grad += x.data * out.grad; x.grad += this.data * out.grad;};
+        out.backward = back;
+
+        return out;
+    }
+
+    public Value sub(Value x){
+        return this.add(x.mul(new Value(-1)));
+    }
+
+    public Value pow(double x){
+        List<Value> children = new ArrayList<>();
+        children.add(this);
+
+        Value out = new Value(Math.pow(data, x), children);
+        Backward back = () -> {this.grad += x*Math.pow(data, x-1) * out.grad;};
+        out.backward = back;
+
+        return out;
+    }
+
+    public Value exp(){
+        List<Value> children = new ArrayList<>();
+        children.add(this);
+
+        Value out = new Value(Math.exp(data), children);
+        Backward back = () -> {this.grad += out.data * out.grad;};
+        out.backward = back;
+
+        return out;
+    }
+
+    public Value tanh(){
+        List<Value> children = new ArrayList<>();
+        children.add(this);
+
+        double tanh = (Math.exp(2*data) - 1) / (Math.exp(2*data) + 1);
+        Value out = new Value(tanh, children);
+        Backward back = () -> {this.grad = (1-(out.data*out.data)) * out.grad;};
         out.backward = back;
 
         return out;
@@ -107,6 +138,6 @@ public class Value{
 
     @Override
     public String toString(){
-        return "Value(data=" + data + ")";
+        return "Value(data=" + data + ", grad=" + grad + ")";
     }
 }
