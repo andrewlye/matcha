@@ -1,3 +1,6 @@
+package matcha.nn;
+
+import matcha.engine.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,8 +41,6 @@ public class Neuron {
 
         return params;
     }
-
-
 
     public String toString(){
         return "Neuron(data=" + Arrays.toString(weights) + ", bias=" + bias.toString() + ")";
