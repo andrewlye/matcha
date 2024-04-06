@@ -3,7 +3,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 public class Value{
     private double data;
     private List<Value> prev; // stores composite values for backprop
@@ -40,7 +39,7 @@ public class Value{
         children.add(this);
         children.add(x);   
 
-        Value out = new Value(data + x.data(), children);
+        Value out = new Value(data + x.data, children);
         Backward back = () -> {this.grad += 1.0 * out.grad; x.grad += 1.0 * out.grad;};
         out.backward = back;
 
@@ -52,7 +51,7 @@ public class Value{
         children.add(this);
         children.add(x);
 
-        Value out = new Value(data * x.data(), children);
+        Value out = new Value(data * x.data, children);
         Backward back = () -> {this.grad += x.data * out.grad; x.grad += this.data * out.grad;};
         out.backward = back;
 
@@ -89,7 +88,7 @@ public class Value{
         List<Value> children = new ArrayList<>();
         children.add(this);
 
-        double tanh = (Math.exp(2*data) - 1) / (Math.exp(2*data) + 1);
+        double tanh = Math.tanh(data);
         Value out = new Value(tanh, children);
         Backward back = () -> {this.grad = (1-(out.data*out.data)) * out.grad;};
         out.backward = back;
@@ -130,10 +129,6 @@ public class Value{
             }
             ordering.add(parent);
         }
-    }
-
-    public List<Value> children(){
-        return prev;
     }
 
     @Override
