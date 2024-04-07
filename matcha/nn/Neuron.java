@@ -1,6 +1,6 @@
 package matcha.nn;
 
-import matcha.engine.*;
+import matcha.engine.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

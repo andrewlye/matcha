@@ -110,6 +110,10 @@ public class Value{
         this.grad = grad;
     }
 
+    public void increment(double x){
+        this.data += x;
+    }
+
     public void backward(){
         List<Value> ordering = new ArrayList<>();
         buildTopo(this, new HashSet<>(), ordering);
@@ -131,6 +135,14 @@ public class Value{
             }
             ordering.add(parent);
         }
+    }
+
+    public List<Value> children(){
+        return prev;
+    }
+
+    public void setChildren(List<Value> prev){
+        this.prev = prev;
     }
 
     @Override
