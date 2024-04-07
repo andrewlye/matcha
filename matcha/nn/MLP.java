@@ -47,6 +47,10 @@ public class MLP {
         return params;
     }
 
+    public List<Neuron> getNeurons(int layer){
+        return layers.get(layer).getNeurons();
+    }
+
     public String toString(){
         String model_desc = "MLP(\n";
         for(Linear layer : layers){

@@ -46,6 +46,10 @@ public class Linear {
         return params;
     }
 
+    public List<Neuron> getNeurons(){
+        return neurons;
+    }
+
     public String toString(){
         return "Linear(in_features=" + in_features + ", out_features=" + out_features + ")";
     }

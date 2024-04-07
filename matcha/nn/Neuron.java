@@ -23,9 +23,11 @@ public class Neuron {
         if (x.length != weights.length){
             throw new Exception("Warning: input dimensions must match!");
         }
-        double sum = 0;
-        for(int i = 0; i < x.length; i++){ sum += weights[i].data()*x[i].data(); }
-        Value out = new Value(sum);
+        Value out = new Value(0.0);
+        for(int i = 0; i < x.length; i++){ 
+            out = out.add(weights[i].mul(x[i])); 
+        }
+        out = out.add(bias);
         return out.tanh();
     }
 
