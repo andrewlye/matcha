@@ -110,8 +110,8 @@ public class Value{
         this.grad = grad;
     }
 
-    public void increment(double x){
-        this.data += x;
+    public void step(double step_size){
+        data += step_size*grad;
     }
 
     public void backward(){
