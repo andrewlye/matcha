@@ -5,6 +5,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+/**
+ * Value wrapper class for autograd and binary/unary functions
+ */
 public class Value{
     private double data;
     private List<Value> prev; // stores composite values for backprop
@@ -48,6 +52,10 @@ public class Value{
         return out;
     }
 
+    public Value add(double x){
+        return this.add(new Value(x));
+    }
+
     public Value mul(Value x){
         List<Value> children = new ArrayList<>();
         children.add(this);
@@ -60,8 +68,24 @@ public class Value{
         return out;
     }
 
+    public Value mul(double x){
+        return this.mul(new Value(x));
+    }
+
+    public Value div(Value x){
+        return this.mul(x.pow(-1));
+    }
+
+    public Value div(double x){
+        return this.div(new Value(x));
+    }
+
     public Value sub(Value x){
         return this.add(x.mul(new Value(-1)));
+    }
+
+    public Value sub(double x){
+        return this.sub(new Value(x));
     }
 
     public Value pow(double x){
@@ -110,10 +134,17 @@ public class Value{
         this.grad = grad;
     }
 
+    /**
+     * Increments the data stored in this Value in the direction of its current gradient.
+     * @param step_size the amount of gradient to apply
+     */
     public void step(double step_size){
         data += step_size*grad;
     }
 
+    /**
+     * Performs backpropagation on this value, computing the gradient of all linked previous values.
+     */
     public void backward(){
         List<Value> ordering = new ArrayList<>();
         buildTopo(this, new HashSet<>(), ordering);
@@ -125,7 +156,10 @@ public class Value{
         }
     }
 
-    public void buildTopo(Value parent, Set<Value> visited, List<Value> ordering){
+    /**
+     * Build a topological-sorted ordering of children Values starting from this Value
+     */
+    private void buildTopo(Value parent, Set<Value> visited, List<Value> ordering){
         if (!visited.contains(parent)){
             visited.add(parent);
             if (parent.prev != null){

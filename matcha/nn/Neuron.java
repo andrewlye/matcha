@@ -6,7 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class Neuron {
+/**
+ * A single neuron, takes an input of the same dimension as its number of weights and computes its dot product + bias run through a nonlinear activation.
+ */
+public class Neuron extends Module<Value>{
     Value[] weights;
     Value bias;
     
@@ -19,7 +22,13 @@ public class Neuron {
         bias = new Value(r.nextDouble());
     }
 
-    public Value pass(Value[] x) throws Exception{
+    /**
+     * 
+     * @param x
+     * @return
+     * @throws Exception
+     */
+    public Value forward(Value[] x) throws Exception{
         if (x.length != weights.length){
             throw new Exception("Warning: input dimensions must match!");
         }
@@ -31,12 +40,10 @@ public class Neuron {
         return out.tanh();
     }
 
-    public Value pass(double[] x) throws Exception{
-        Value[] x_vals = new Value[x.length];
-        for(int i = 0; i < x.length; i++){ x_vals[i] = new Value(x[i]); }
-        return pass(x_vals);
-    }
-
+    /**
+     * Returns references to all of the parameters 
+     * @return
+     */
     public List<Value> parameters(){
         List<Value> params = new ArrayList<>(Arrays.asList(weights));
         params.add(bias);

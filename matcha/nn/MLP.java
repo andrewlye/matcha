@@ -6,7 +6,7 @@ import java.util.List;
 
 import matcha.engine.Value;
 
-public class MLP {
+public class MLP extends Module<Value[]>{
     private List<Linear> layers;
     
     public MLP(int in_channels, List<Integer> hidden_channels){
@@ -23,17 +23,11 @@ public class MLP {
         Value[] prev = x;
         Value[] next = null;
         for(Linear layer : layers){
-            next = layer.pass(prev);
+            next = layer.forward(prev);
             prev = next;
         }
 
         return next;
-    }
-
-    public Value[] forward(double[] x) throws Exception{
-        Value[] x_vals = new Value[x.length];
-        for(int i = 0; i < x.length; i++){ x_vals[i] = new Value(x[i]); }
-        return forward(x_vals);
     }
 
     public List<Value> parameters(){

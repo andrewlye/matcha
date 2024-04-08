@@ -5,7 +5,7 @@ import java.util.List;
 
 import matcha.engine.Value;
 
-public class Linear {
+public class Linear extends Module<Value[]>{
     private List<Neuron> neurons;
     private int in_features;
     private int out_features;
@@ -20,19 +20,13 @@ public class Linear {
         }
     }
 
-    public Value[] pass(Value[] x) throws Exception{
+    public Value[] forward(Value[] x) throws Exception{
         Value[] outs = new Value[out_features];
         for(int i = 0; i < neurons.size(); i++){
-            outs[i] = neurons.get(i).pass(x);
+            outs[i] = neurons.get(i).forward(x);
         }
 
         return outs;
-    }
-
-    public Value[] pass(double[] x) throws Exception{
-        Value[] x_vals = new Value[x.length];
-        for(int i = 0; i < x.length; i++){ x_vals[i] = new Value(x[i]); }
-        return pass(x_vals);
     }
 
     public List<Value> parameters(){
