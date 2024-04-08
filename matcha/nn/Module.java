@@ -1,5 +1,6 @@
 package matcha.nn;
 
+import java.util.Arrays;
 import java.util.List;
 import matcha.engine.Value;
 
@@ -11,8 +12,7 @@ public abstract class Module<T> {
     abstract T forward(Value[] x) throws Exception;
 
     public T forward(double[] x) throws Exception{
-        Value[] x_vals = new Value[x.length];
-        for(int i = 0; i < x.length; i++){ x_vals[i] = new Value(x[i]); }
+        Value[] x_vals = Arrays.stream(x).mapToObj(o -> new Value(o)).toArray(Value[]::new);
 
         return forward(x_vals);
     }
