@@ -13,6 +13,7 @@ public class Linear extends Module<Value[]>{
     private List<Neuron> neurons;
     private int in_features;
     private int out_features;
+    private String activation = "relu";
 
     /**
      * @param in_features size of each input sample
@@ -25,6 +26,21 @@ public class Linear extends Module<Value[]>{
 
         for(int i = 0; i < out_features; i++){
             neurons.add(new Neuron(in_features));
+        }
+    }
+
+    public Linear(int in_features, int out_features, String activation){
+        this.in_features = in_features;
+        this.out_features = out_features;
+        neurons = new ArrayList<>(out_features);
+        this.activation = activation;
+
+        for(int i = 0; i < out_features; i++){
+            try{
+                neurons.add(new Neuron(in_features, activation));
+            } catch (Exception e){
+                System.out.println(e.getMessage());
+            }
         }
     }
 

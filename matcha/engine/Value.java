@@ -122,6 +122,20 @@ public class Value{
         return out;
     }
 
+    public Value relu(){
+        List<Value> children = new ArrayList<>();
+        children.add(this);
+
+        double relu = Math.max(this.data, 0.0);
+        Value out = new Value(relu, children);
+        Backward back = () -> {
+            this.grad = ((this.data > 0) ? 1 : 0) * out.grad;
+        };
+        out.backward = back;
+
+        return out;
+    }
+
     public double data(){
         return data;
     }

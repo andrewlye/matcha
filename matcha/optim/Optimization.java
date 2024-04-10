@@ -10,7 +10,7 @@ public abstract class Optimization {
         this.params = params;
     }
     
-    public void zero_grad(){
+    public void zeroGrad(){
         for(Value param : params){;
             param.setGradient(0.0);
         }

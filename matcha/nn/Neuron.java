@@ -10,8 +10,9 @@ import java.util.Random;
  * A single neuron, takes an input of the same dimension as its number of weights and computes its dot product + bias run through a nonlinear activation.
  */
 public class Neuron extends Module<Value>{
-    Value[] weights;
-    Value bias;
+    private Value[] weights;
+    private Value bias;
+    private String activation = "relu";
     
     public Neuron(int n_in){
         weights = new Value[n_in];
@@ -20,6 +21,20 @@ public class Neuron extends Module<Value>{
             weights[i] = new Value(r.nextDouble());
         }
         bias = new Value(r.nextDouble());
+    }
+
+    public Neuron(int n_in, String activation) throws Exception{
+        if (!((activation.equals("relu")) || activation.equals("tanh"))){
+            throw new Exception("Warning: activation function must be of the following: 'relu', 'tanh' ");
+        }
+
+        weights = new Value[n_in];
+        Random r = new Random();
+        for(int i = 0; i < weights.length; i++){
+            weights[i] = new Value(r.nextDouble());
+        }
+        bias = new Value(r.nextDouble());
+        this.activation = activation;
     }
 
     /**
@@ -38,7 +53,13 @@ public class Neuron extends Module<Value>{
             out = out.add(weights[i].mul(x[i])); 
         }
         out = out.add(bias);
-        return out.tanh();
+
+        if (activation.equals("relu")){
+            return out.relu();
+        }
+        else{
+            return out.tanh();
+        }
     }
 
     /**
@@ -51,6 +72,10 @@ public class Neuron extends Module<Value>{
         params.add(bias);
 
         return params;
+    }
+
+    public String getActivation(){
+        return activation;
     }
 
     public String toString(){
