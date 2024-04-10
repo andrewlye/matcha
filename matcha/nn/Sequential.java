@@ -1,41 +1,19 @@
 package matcha.nn;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import matcha.engine.Value;
 
-public class MLP extends Module<Value[]>{
-    private List<Module<Value[]>> layers;
-    private List<String> activations;
+public class Sequential extends Module<Value[]>{
+    List<Module<Value[]>> layers;
 
-    public MLP(int in_channels, List<Integer> hidden_channels, List<String> activations) throws Exception{
-        List<Integer> sizes = new ArrayList<>(hidden_channels);
-        sizes.add(0, in_channels);
-
-        if (activations.size() != sizes.size()-1){
-            throw new Exception("Warning: activations must be the same in length as the number of layers!");
-        } else{
-            this.activations = activations;
-        }
-
-        layers = new ArrayList<>(sizes.size()-1);
-        for(int i = 0; i < sizes.size() - 1; i++){
-            layers.add(new Linear(sizes.get(i), sizes.get(i+1)));
-            if (activations.get(i).toLowerCase().equals("tanh")){
-                layers.add(new Tanh());
-            } else if (activations.get(i).toLowerCase().equals("relu")){
-                layers.add(new ReLU());
-            }
-        }
-
-        System.out.println(layers.size());
-
+    public Sequential(List<Module<Value[]>> layers){
+        this.layers = layers;
     }
 
     @Override
-    public Value[] forward(Value[] x) throws Exception{
+    public Value[] forward(Value[] x) throws Exception {
         Value[] prev = x;
         Value[] next = null;
         for(Module<Value[]> layer : layers){
@@ -47,8 +25,8 @@ public class MLP extends Module<Value[]>{
     }
 
     @Override
-    public List<Value> parameters(){
-        List<Value> params = new ArrayList<>();
+    public List<Value> parameters() {
+       List<Value> params = new ArrayList<>();
         for(Module<Value[]> layer : layers){
             for(Value param : layer.parameters()){
                 params.add(param);
@@ -80,7 +58,7 @@ public class MLP extends Module<Value[]>{
     }
 
     public String toString(){
-        String model_desc = "MLP(\n";
+        String model_desc = "Sequential(\n";
         for(Module<Value[]> layer : layers){
             model_desc += "   " + layer.toString() + "\n";
         }

@@ -13,7 +13,7 @@ public class Linear extends Module<Value[]>{
     private List<Neuron> neurons;
     private int in_features;
     private int out_features;
-    private String activation = "relu";
+    private String activation = "none";
 
     /**
      * @param in_features size of each input sample
@@ -24,9 +24,7 @@ public class Linear extends Module<Value[]>{
         this.out_features = out_features;
         neurons = new ArrayList<>(out_features);
 
-        for(int i = 0; i < out_features; i++){
-            neurons.add(new Neuron(in_features));
-        }
+        buildLayer();
     }
 
     public Linear(int in_features, int out_features, String activation){
@@ -35,6 +33,10 @@ public class Linear extends Module<Value[]>{
         neurons = new ArrayList<>(out_features);
         this.activation = activation;
 
+        buildLayer();
+    }
+
+    private void buildLayer(){
         for(int i = 0; i < out_features; i++){
             try{
                 neurons.add(new Neuron(in_features, activation));

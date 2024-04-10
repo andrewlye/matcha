@@ -12,7 +12,7 @@ import java.util.Random;
 public class Neuron extends Module<Value>{
     private Value[] weights;
     private Value bias;
-    private String activation = "relu";
+    private String activation = "none";
     
     public Neuron(int n_in){
         weights = new Value[n_in];
@@ -24,8 +24,8 @@ public class Neuron extends Module<Value>{
     }
 
     public Neuron(int n_in, String activation) throws Exception{
-        if (!((activation.equals("relu")) || activation.equals("tanh"))){
-            throw new Exception("Warning: activation function must be of the following: 'relu', 'tanh' ");
+        if (!((activation.equals("relu")) || activation.equals("tanh") || activation.equals("none"))){
+            throw new Exception("Warning: activation function must be of the following: 'relu', 'tanh', 'none'.");
         }
 
         weights = new Value[n_in];
@@ -56,16 +56,13 @@ public class Neuron extends Module<Value>{
 
         if (activation.equals("relu")){
             return out.relu();
-        }
-        else{
+        } else if (activation.equals("tanh")){
             return out.tanh();
+        } else{
+            return out;
         }
     }
 
-    /**
-     * Returns references to all of the parameters 
-     * @return
-     */
     @Override
     public List<Value> parameters(){
         List<Value> params = new ArrayList<>(Arrays.asList(weights));

@@ -25,6 +25,10 @@ public abstract class Module<T> {
         return forward(x_vals);
     }
 
+    public T forward(Value x) throws Exception{
+        return forward(new Value[]{x});
+    }
+
     public T forward(double[] x) throws Exception{
         Double[] x_vals = Arrays.stream(x).mapToObj(o -> Double.valueOf(o)).toArray(Double[]::new);
         return forward(x_vals);
