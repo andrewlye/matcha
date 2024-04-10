@@ -5,11 +5,19 @@ import java.util.List;
 
 import matcha.engine.Value;
 
+/**
+ * Applies a linear transformation to incoming data
+ */
+
 public class Linear extends Module<Value[]>{
     private List<Neuron> neurons;
     private int in_features;
     private int out_features;
 
+    /**
+     * @param in_features size of each input sample
+     * @param out_features size of each output sample
+     */
     public Linear(int in_features, int out_features){
         this.in_features = in_features;
         this.out_features = out_features;
@@ -20,6 +28,7 @@ public class Linear extends Module<Value[]>{
         }
     }
 
+    @Override
     public Value[] forward(Value[] x) throws Exception{
         Value[] outs = new Value[out_features];
         for(int i = 0; i < neurons.size(); i++){
@@ -29,6 +38,7 @@ public class Linear extends Module<Value[]>{
         return outs;
     }
 
+    @Override
     public List<Value> parameters(){
         List<Value> params = new ArrayList<>();
         for(Neuron neuron : neurons){

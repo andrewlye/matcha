@@ -19,6 +19,7 @@ public class MLP extends Module<Value[]>{
         }
     }
 
+    @Override
     public Value[] forward(Value[] x) throws Exception{
         Value[] prev = x;
         Value[] next = null;
@@ -30,6 +31,7 @@ public class MLP extends Module<Value[]>{
         return next;
     }
 
+    @Override
     public List<Value> parameters(){
         List<Value> params = new ArrayList<>();
         for(Linear layer : layers){

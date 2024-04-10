@@ -9,6 +9,12 @@ import matcha.engine.Value;
  */
 public abstract class Module<T> {
     
+    /**
+     * Performs a forward pass of data through a network module.
+     * @param x, the input data
+     * @return the input data with the respecticve transformation(s) applied
+     * @throws Exception, if there is a mismatch in input dims
+     */
     abstract T forward(Value[] x) throws Exception;
 
     public T forward(double[] x) throws Exception{

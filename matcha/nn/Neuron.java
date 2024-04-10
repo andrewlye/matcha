@@ -28,6 +28,7 @@ public class Neuron extends Module<Value>{
      * @return
      * @throws Exception
      */
+    @Override
     public Value forward(Value[] x) throws Exception{
         if (x.length != weights.length){
             throw new Exception("Warning: input dimensions must match!");
@@ -44,6 +45,7 @@ public class Neuron extends Module<Value>{
      * Returns references to all of the parameters 
      * @return
      */
+    @Override
     public List<Value> parameters(){
         List<Value> params = new ArrayList<>(Arrays.asList(weights));
         params.add(bias);
