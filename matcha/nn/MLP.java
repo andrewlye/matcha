@@ -72,6 +72,10 @@ public class MLP extends Module<Value[]>{
         return out;
     }
 
+    public List<Linear> getLayers(){
+       return layers;
+    }
+
     public List<Neuron> getNeurons(int layer){
         return layers.get(layer).getNeurons();
     }

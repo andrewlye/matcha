@@ -70,6 +70,10 @@ public class Linear extends Module<Value[]>{
         return neurons;
     }
 
+    public String activation(){
+        return activation;
+    }
+
     public String toString(){
         return "Linear(in_features=" + in_features + ", out_features=" + out_features + ")";
     }
