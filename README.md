@@ -62,7 +62,7 @@ public class Example{
 
         }
 
-        // output newly trained outputs
+        // check newly trained outputs
         ArrayList<Value> outs = new ArrayList<>();
         for(int i=0; i < Xs.length; i++){
             outs.add(nn.forward(Xs[i])[0]);
