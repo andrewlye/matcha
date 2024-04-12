@@ -48,9 +48,9 @@ public class Example{
                 outputs[j] = nn.forward(Xs[j])[0];
             }
 
-            MSELoss loss_func = new MSELoss(); // create Mean Squared Error (MSE) loss function
+            MSELoss loss_func = new MSELoss(); // Mean Squared Error (MSE) loss function
             Value loss = loss_func.loss(outputs, Ys);
-            SGD optim = new SGD(nn.parameters(), 0.1); // create optimizer
+            SGD optim = new SGD(nn.parameters(), 0.1); // SGD optimizer
 
             if(i % 10 == 0)
                 System.out.println("iter: " + i + ", loss: " + loss.data());
