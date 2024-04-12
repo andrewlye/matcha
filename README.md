@@ -17,6 +17,7 @@ import java.util.List;
 
 public class Example{
     public static void main(String[] args) throws Exception{
+        // constructing a simple network
         List<matcha.nn.Module<Value[]>> layers = new ArrayList<>();
         layers.add(new Linear(3,4));
         layers.add(new ReLU());
@@ -27,38 +28,46 @@ public class Example{
         
         Sequential nn = new Sequential(layers);
 
+        // prints network information, such as layers and dimensions
         System.out.println(nn);
 
+        // example input data
         double[][] Xs = new double[4][3];
         Xs[0] = new double[]{2.0, 3.0, -1.0};
         Xs[1] = new double[]{3.0, -1.0, 0.5};
         Xs[2] = new double[]{0.5, 1.0, 1.0};
         Xs[3] = new double[]{1.0, 1.0, -1.0};
 
+        // example target values for each input
         double[] Ys = new double[]{1.0, -1.0, -1.0, 1.0};
 
+        // training loop
         for(int i = 1; i <= 200; i++){
             Value[] outputs = new Value[4];
             for(int j = 0; j < Xs.length; j++){
                 outputs[j] = nn.forward(Xs[j])[0];
             }
-            MSELoss loss_func = new MSELoss();
+
+            MSELoss loss_func = new MSELoss(); // create Mean Squared Error (MSE) loss function
             Value loss = loss_func.loss(outputs, Ys);
-            SGD optim = new SGD(nn.parameters(), 0.1);
+            SGD optim = new SGD(nn.parameters(), 0.1); // create optimizer
 
             if(i % 10 == 0)
-                System.out.println("epoch " + i + ", loss: " + loss.data());
+                System.out.println("iter: " + i + ", loss: " + loss.data());
 
+            // backpropagation and optimization
             optim.zeroGrad();
             loss.backward();
             optim.step();
 
         }
 
+        // output newly trained outputs
         ArrayList<Value> outs = new ArrayList<>();
         for(int i=0; i < Xs.length; i++){
             outs.add(nn.forward(Xs[i])[0]);
         }
+
         System.out.print("[ ");
         for(Value out : outs){
             System.out.print(out.data() + " ");
