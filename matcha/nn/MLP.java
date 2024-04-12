@@ -6,18 +6,24 @@ import java.util.List;
 
 import matcha.engine.Value;
 
+/**
+ * A multi-layer perceptron (MLP) module.
+ */
 public class MLP extends Module<Value[]>{
     private List<Module<Value[]>> layers;
-    private List<String> activations;
 
+    /**
+     * @param in_channels Number of channels of the input
+     * @param hidden_channels List of hidden channel dimensions
+     * @param activations List of inter-layer activations
+     * @throws Exception
+     */
     public MLP(int in_channels, List<Integer> hidden_channels, List<String> activations) throws Exception{
         List<Integer> sizes = new ArrayList<>(hidden_channels);
         sizes.add(0, in_channels);
 
         if (activations.size() != sizes.size()-1){
             throw new Exception("Warning: activations must be the same in length as the number of layers!");
-        } else{
-            this.activations = activations;
         }
 
         layers = new ArrayList<>(sizes.size()-1);
@@ -58,6 +64,9 @@ public class MLP extends Module<Value[]>{
         return params;
     }
 
+    /**
+     * @return All neurons in the network's non-activation layers
+     */
     public List<List<Neuron>> getNeurons(){
         List<List<Neuron>> out = new ArrayList<>(layers.size());
         for(Module<Value[]> layer : layers){
@@ -68,16 +77,23 @@ public class MLP extends Module<Value[]>{
         return out;
     }
 
-    public List<Module<Value[]>> getLayers(){
-       return layers;
-    }
-
+    /**
+     * @param layer, the layer to retrieve neurons from
+     * @return All neurons in the specified layer of the network, if applicable
+     */
     public List<Neuron> getNeurons(int layer){
         if (layers.get(layer) instanceof Linear){
             return ((Linear) layers.get(layer)).getNeurons();
         }
         else return null;
     }
+
+    /**
+     * @return All network layers
+     */
+    public List<Module<Value[]>> getLayers(){
+        return layers;
+     }
 
     public String toString(){
         String model_desc = "MLP(\n";
