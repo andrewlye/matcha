@@ -2,7 +2,7 @@
 *Neural networks in Java.*
 
 ## Overview
-A standalone simple yet powerful neural networks library and autograd engine built on Java that combines torch-like API with standard library features. Inspired from [PyTorch](https://pytorch.org/) and [micrograd](https://github.com/karpathy/micrograd).
+A standalone, simple yet powerful neural networks library and autograd engine built on Java's standard library. Inspired from [PyTorch](https://pytorch.org/) and Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
 - `matcha.engine` Contains the main code for autograd and backpropagation.
 - `matcha.nn` Contains neural network modules from neurons to MLPs, as well as loss functions.
 - `matcha.optim` Contains various optimization algorithms, such as Stochastic Gradient Descent (SGD) and Adam.
