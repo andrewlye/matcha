@@ -8,7 +8,7 @@ A standalone simple yet powerful neural networks library and autograd engine bui
 - `matcha.optim` Contains various optimization algorithms, such as Stochastic Gradient Descent (SGD) and Adam.
 
 ## Example
-```
+```Java
 import matcha.engine.*;
 import matcha.nn.*;
 import matcha.optim.*;
