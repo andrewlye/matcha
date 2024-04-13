@@ -116,7 +116,7 @@ public class Value{
 
         double tanh = Math.tanh(data);
         Value out = new Value(tanh, children);
-        Backward back = () -> {this.grad = (1-(out.data*out.data)) * out.grad;};
+        Backward back = () -> {this.grad += (1-(out.data*out.data)) * out.grad;};
         out.backward = back;
 
         return out;
@@ -129,7 +129,7 @@ public class Value{
         double relu = Math.max(this.data, 0.0);
         Value out = new Value(relu, children);
         Backward back = () -> {
-            this.grad = ((this.data > 0) ? 1 : 0) * out.grad;
+            this.grad += ((this.data > 0) ? 1 : 0) * out.grad;
         };
         out.backward = back;
 
