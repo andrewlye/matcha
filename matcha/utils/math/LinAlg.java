@@ -35,14 +35,14 @@ public class LinAlg {
      * @param idxs the shape-indices of the element to retrieve.
      * @return The index of the list element associated at the shape index in row-major order.
      */
-    public static int indexRowMajor(double[] elements, int[] shape, int[] idxs) throws Exception {
+    public static int rmo(int elements, int[] shape, int[] idxs) throws Exception {
         if (shape.length != idxs.length) {
             throw new Exception("Error: number of indexes must match shape of object!");
         } 
 
         int elementsInShape = 1;
         for(int i = 0; i < shape.length; i++) elementsInShape *= shape[i];
-        if (elements.length != elementsInShape){
+        if (elements != elementsInShape){
             throw new Exception("Error: the number of elements specified by the shape does not match the data.");
         }
 
