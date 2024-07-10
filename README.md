@@ -1,3 +1,5 @@
+* Currently under major redevelopment for tensor operations.
+
 # matcha
 *Neural networks in Java.*
 
