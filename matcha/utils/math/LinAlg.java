@@ -37,7 +37,7 @@ public class LinAlg {
      */
     public static int rmo(int elements, int[] shape, int[] idxs) throws Exception {
         if (shape.length != idxs.length) {
-            throw new Exception("Error: number of indexes must match shape of object!");
+            throw new Exception("Error: number of indexes must match dimensionality of object!");
         } 
 
         int elementsInShape = 1;

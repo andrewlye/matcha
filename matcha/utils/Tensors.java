@@ -1,12 +1,19 @@
 package matcha.utils;
 
-import java.util.Arrays;
-
 import matcha.engine.Tensor;
 import matcha.utils.math.LinAlg;
 
-public class Tensors {
 
+/**
+ * utils/Tensors - contains static methods for viewing/visualizing tensors.
+ * @author andrewye
+ */
+public class Tensors {
+    /**
+     * Returns a string-representation of a Tensor object
+     * @param t the tensor object to read
+     * @return a string-representation of the tensor
+     */
     public static String toString(Tensor t){
         try{
             StringBuilder sb = new StringBuilder();
@@ -25,6 +32,26 @@ public class Tensors {
         }
     }
 
+    public static String showGrad(Tensor t) {
+        try{
+            return toString(t.grad(), t.shape(), new int[t.shape().length], t.shape().length-1, new StringBuilder());
+        } 
+        catch (Exception e) {
+            return e.toString(); 
+        }
+    }
+
+
+    /**
+     * Returns the string-representation of an array parameterized by a shape
+     * @param data the data to read
+     * @param shape the shape that specified the data, row-major order is assumed
+     * @param idxs for higher (>2) dimensional data, fixes dimensions to print their components
+     * @param d the current dimension to fix
+     * @param sb StringBuilder
+     * @return
+     * @throws Exception 
+     */
     private static String toString(double[] data, int[] shape, int[] idxs, int d, StringBuilder sb) throws Exception{
         if (d == 1){
             sb.append("[");
