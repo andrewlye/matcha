@@ -2,14 +2,12 @@ package matcha.engine;
 
 import matcha.utils.math.LinAlg;
 
-import java.security.spec.ECFieldF2m;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.DoubleStream;
 
 /**
  * Tensor - in accordance with its more primitive predecessor Value, the core data structure behind matcha operations.
