@@ -1,4 +1,23 @@
 * Currently under major redevelopment for tensor operations.
+  
+Estimated completion: August
+  
+### engine.Tensor vs engine.Value
+| Value | Tensor |
+| ----- | ------ |
+| Data is stored as a single numeric Value class | Data is stored in a primitive 1-D array, indexed by the shape attribute (row-major) | 
+| Gradients are stored individually in memory | Gradients are stored in primitive 1-D arrays, indexed correspondingly by the shape attribute |
+| Higher dimensional structures are lists of (non-primitive arrays of) Values | Higher dimensional structures are still primitive 1-D arrays, just with a larger shape |
+| Many memory references and hierarchical structures | Less class nesting as most operations are done directly on Tensors |
+| Backpropagation is always calculated | Backpropagation can be toggled on/off per tensor |
+
+### Why tensors?
+
+Here is a runtime comparison of a single forward pass of an input vector through linear layers of shapes (4, 2.5M/5M/10M/100M) averaged over ten passes. Each linear layer contains 10 million, 20 million, 40 million, and 400 million parameters, respectively. OOM - out of memory.
+| Engine | (4x2.5mil) = 10mil | (4x5mil) = 20mil | (4x10mil) = 40mil | (4x100mil) = 400mil |
+| --- | --- | --- | --- | --- |
+| `matcha.engine.Value` | 3.64998s | OOM | OOM | OOM |
+| `matcha.engine.Tensor` | 0.22332s| 0.44060s | 0.88061s | 10.54275s |
 
 # matcha
 *Neural networks in Java.*
