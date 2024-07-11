@@ -8,7 +8,7 @@ Estimated completion: August
 | Data is stored as a single numeric Value class | Data is stored in a primitive 1-D array, indexed by the shape attribute (row-major) | 
 | Gradients are stored individually in memory | Gradients are stored in primitive 1-D arrays, indexed correspondingly by the shape attribute |
 | Higher dimensional structures are lists of (non-primitive arrays of) Values | Higher dimensional structures are still primitive 1-D arrays, just with a larger shape |
-| Many memory references and hierarchical structures | Less class nesting as most operations are done directly on Tensors |
+| Many memory references and hierarchical structures | Less class nesting as most operations are done directly on Tensors, especially for complex operations like softmax |
 | Backpropagation is always calculated | Backpropagation can be toggled on/off per tensor |
 
 ### Why tensors?
