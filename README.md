@@ -12,7 +12,7 @@ A standalone, simple yet powerful neural networks library and autograd engine bu
 ## Example
 ```Java
 import matcha.engine.*;
-import matcha.nn.*;
+import matcha.legacy.nn.*;
 import matcha.optim.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +20,15 @@ import java.util.List;
 public class Example{
     public static void main(String[] args) throws Exception{
         // constructing a simple network
-        List<matcha.nn.Module<Value[]>> layers = new ArrayList<>();
-        layers.add(new Linear(3,4));
-        layers.add(new ReLU());
-        layers.add(new Linear(4,4));
-        layers.add(new Tanh());
-        layers.add(new Linear(4,1));
-        layers.add(new Tanh());
+        List<matcha.legacy.nn.vModule<Value[]>> layers = new ArrayList<>();
+        layers.add(new vLinear(3,4));
+        layers.add(new vReLU());
+        layers.add(new vLinear(4,4));
+        layers.add(new vTanh());
+        layers.add(new vLinear(4,1));
+        layers.add(new vTanh());
         
-        Sequential nn = new Sequential(layers);
+        vSequential nn = new vSequential(layers);
 
         // prints network information, such as layers and dimensions
         System.out.println(nn);
@@ -69,7 +69,7 @@ public class Example{
                 outputs[j] = nn.forward(Xs[j])[0];
             }
 
-            MSELoss loss_func = new MSELoss(); // Mean Squared Error (MSE) loss function
+            vMSELoss loss_func = new vMSELoss(); // Mean Squared Error (MSE) loss function
             Value loss = loss_func.loss(outputs, Ys);
             SGD optim = new SGD(nn.parameters(), 0.1); // SGD optimizer
 
