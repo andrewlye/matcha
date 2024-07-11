@@ -48,6 +48,28 @@ public class Tensor {
         this.data = new double[numElements];
     }
 
+    public Tensor(int[] shape, boolean gradEnabled) throws Exception{
+        // null shape arrays become scalars
+        if (shape.length == 0) shape = new int[] {1, 1};
+        // Shape dimensions must be greater than 0
+        for (int d : shape) if (d < 1) throw new Exception("Error: dimensions must be > 0!");
+        // if a single number d is passed, creates a dx1 column vector
+        if (shape.length == 1){
+            int[] colVec = new int[2];
+            colVec[0] = shape[0];
+            colVec[1] = 1;
+            shape = colVec;
+        }
+
+        this.shape = shape;
+        int numElements = 1;
+        for (int i = 0; i < shape.length; i++)
+            numElements *= shape[i];
+        this.data = new double[numElements];
+        
+        withGrad(gradEnabled);
+    }
+
     public Tensor(int[] shape, double[] data) throws Exception{
         // null shape arrays become scalars
         if (shape.length == 0) shape = new int[] {1, 1};

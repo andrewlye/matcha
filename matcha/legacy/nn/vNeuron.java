@@ -1,4 +1,4 @@
-package matcha.nn;
+package matcha.legacy.nn;
 
 import matcha.engine.Value;
 import java.util.ArrayList;
@@ -9,12 +9,12 @@ import java.util.Random;
 /**
  * A single neuron, takes an input of the same dimension as its number of weights and computes its dot product + bias run through a nonlinear activation.
  */
-public class Neuron extends Module<Value>{
+public class vNeuron extends vModule<Value>{
     private Value[] weights;
     private Value bias;
     private String activation = "none";
     
-    public Neuron(int n_in){
+    public vNeuron(int n_in){
         weights = new Value[n_in];
         Random r = new Random();
         for(int i = 0; i < weights.length; i++){
@@ -23,7 +23,7 @@ public class Neuron extends Module<Value>{
         bias = new Value(r.nextDouble());
     }
 
-    public Neuron(int n_in, String activation) throws Exception{
+    public vNeuron(int n_in, String activation) throws Exception{
         if (!((activation.equals("relu")) || activation.equals("tanh") || activation.equals("none"))){
             throw new Exception("Warning: activation function must be of the following: 'relu', 'tanh', 'none'.");
         }

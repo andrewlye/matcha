@@ -1,4 +1,4 @@
-package matcha.nn;
+package matcha.legacy.nn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,16 +6,16 @@ import java.util.List;
 import matcha.engine.Value;
 
 /**
- * A sequential container for matcha.nn Modules
+ * A sequential container for matcha.legacy.nn Modules
  */
-public class Sequential extends Module<Value[]>{
-    List<Module<Value[]>> layers;
+public class vSequential extends vModule<Value[]>{
+    List<vModule<Value[]>> layers;
 
     /**
      * Modules are added in the order they are passed to the constructor.
-     * @param layers A list of matcha.nn.Module classes
+     * @param layers A list of matcha.legacy.nn.Module classes
      */
-    public Sequential(List<Module<Value[]>> layers){
+    public vSequential(List<vModule<Value[]>> layers){
         this.layers = layers;
     }
 
@@ -24,7 +24,7 @@ public class Sequential extends Module<Value[]>{
     public Value[] forward(Value[] x) throws Exception {
         Value[] prev = x;
         Value[] next = null;
-        for(Module<Value[]> layer : layers){
+        for(vModule<Value[]> layer : layers){
             next = layer.forward(prev);
             prev = next;
         }
@@ -35,7 +35,7 @@ public class Sequential extends Module<Value[]>{
     @Override
     public List<Value> parameters() {
        List<Value> params = new ArrayList<>();
-        for(Module<Value[]> layer : layers){
+        for(vModule<Value[]> layer : layers){
             for(Value param : layer.parameters()){
                 params.add(param);
             }
@@ -47,11 +47,11 @@ public class Sequential extends Module<Value[]>{
     /**
      * @return All neurons in the network's non-activation layers
      */
-    public List<List<Neuron>> getNeurons(){
-        List<List<Neuron>> out = new ArrayList<>(layers.size());
-        for(Module<Value[]> layer : layers){
-            if(layer instanceof Linear)
-                out.add(((Linear) layer).getNeurons());
+    public List<List<vNeuron>> getNeurons(){
+        List<List<vNeuron>> out = new ArrayList<>(layers.size());
+        for(vModule<Value[]> layer : layers){
+            if(layer instanceof vLinear)
+                out.add(((vLinear) layer).getNeurons());
         }
 
         return out;
@@ -61,9 +61,9 @@ public class Sequential extends Module<Value[]>{
      * @param layer, the layer to retrieve neurons from
      * @return All neurons in the specified layer of the network, if applicable
      */
-    public List<Neuron> getNeurons(int layer){
-        if (layers.get(layer) instanceof Linear){
-            return ((Linear) layers.get(layer)).getNeurons();
+    public List<vNeuron> getNeurons(int layer){
+        if (layers.get(layer) instanceof vLinear){
+            return ((vLinear) layers.get(layer)).getNeurons();
         }
         else return null;
     }
@@ -71,13 +71,13 @@ public class Sequential extends Module<Value[]>{
     /**
      * @return All network layers
      */
-    public List<Module<Value[]>> getLayers(){
+    public List<vModule<Value[]>> getLayers(){
        return layers;
     }
 
     public String toString(){
         String model_desc = "Sequential(\n";
-        for(Module<Value[]> layer : layers){
+        for(vModule<Value[]> layer : layers){
             model_desc += "   " + layer.toString() + "\n";
         }
         model_desc += ")";

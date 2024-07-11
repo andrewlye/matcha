@@ -1,22 +1,17 @@
-package matcha.nn;
+package matcha.legacy.nn;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import matcha.engine.Value;
 
-public class Softmax extends Module<Value[]>{
+public class vReLU extends vModule<Value[]>{
+
     @Override
     Value[] forward(Value[] x) throws Exception {
         Value[] out = new Value[x.length];
-        double norm = 0.0;
-        
         for(int i = 0; i < x.length; i++){
-            out[i] = x[i].exp();
-            norm += out[i].data();
-        }
-        for(int i = 0; i < x.length; i++){
-            out[i] = out[i].div(norm);
+            out[i] = x[i].relu();
         }
 
         return out;
@@ -29,6 +24,7 @@ public class Softmax extends Module<Value[]>{
 
     @Override
     public String toString(){
-        return "Softmax()";
+        return "ReLU()";
     }
+    
 }

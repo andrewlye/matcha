@@ -1,12 +1,12 @@
-package matcha.nn;
+package matcha.legacy.nn;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import matcha.engine.Value;
 
-public class Tanh extends Module<Value[]>{
-    public Tanh(){
+public class vTanh extends vModule<Value[]>{
+    public vTanh(){
 
     }
 

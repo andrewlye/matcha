@@ -1,9 +1,9 @@
-package matcha.nn;
+package matcha.legacy.nn;
 
 import matcha.engine.Value;
 
-public class MSELoss extends Loss<Value>{
-    public MSELoss(){
+public class vMSELoss extends vLoss<Value>{
+    public vMSELoss(){
 
     }
 

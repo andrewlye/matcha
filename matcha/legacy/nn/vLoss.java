@@ -1,10 +1,10 @@
-package matcha.nn;
+package matcha.legacy.nn;
 
 import java.util.Arrays;
 
 import matcha.engine.Value;
 
-public abstract class Loss<T>{
+public abstract class vLoss<T>{
     abstract T loss(Value[] outputs, Value[] targets);
 
     public T loss(Value[] outputs, double[] targets){
