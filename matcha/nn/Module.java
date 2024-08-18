@@ -6,7 +6,7 @@ import matcha.engine.Tensor;
 
 public abstract class Module {
 
-    abstract Tensor forward(Tensor x) throws Exception;
+    abstract Tensor forward(Tensor x);
 
     abstract List<Tensor> parameters();
 }

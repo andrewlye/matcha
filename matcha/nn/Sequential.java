@@ -13,7 +13,7 @@ public class Sequential extends Module {
     }
 
     @Override
-    public Tensor forward(Tensor x) throws Exception {
+    public Tensor forward(Tensor x){
         Tensor prev = x;
         Tensor next = null;
         for(Module layer : layers){

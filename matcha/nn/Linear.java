@@ -16,11 +16,7 @@ public class Linear extends Module{
         this.in_features = in_features;
         this.out_features = out_features;
         
-        try {
-            wandb = new Tensor(new int[]{in_features, out_features}, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        wandb = new Tensor(new int[]{in_features, out_features}, true);
 
         Initializer.uniform(wandb);
     }
@@ -39,7 +35,7 @@ public class Linear extends Module{
     }
 
     @Override
-    public Tensor forward(Tensor x) throws Exception {
+    public Tensor forward(Tensor x){
         return x.matmul(wandb, true);
     }
 

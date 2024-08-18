@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +16,7 @@ import java.util.Set;
  * The Tensor class holds the core structure and manipulation methods behind data operations in matcha.
  * @author andrewye
  */
-public class Tensor {
+public class Tensor{
     private int[] m_shape; // shape of tensor
     // data is stored as a 1-d array in memory, with shapes being row-major indexed. See https://pytorch.org/docs/stable/storage.html
     private double[] m_data;
@@ -237,6 +239,146 @@ public class Tensor {
         return t_B;
     }
 
+    public Tensor softmax(int axis){
+        double[] maxData = fillDataAlong(getIndicesAlong(axis), getMaxAlong(axis), axis);
+        double[] dataOut = m_data.clone();
+        for(int i = 0; i < dataOut.length; i++) dataOut[i] -= maxData[i];
+        dataOut = Arrays.stream(dataOut).map(x -> Math.exp(x)).toArray();
+        double[] expSums = fillDataAlong(getIndicesAlong(axis), getSumsAlong(axis, dataOut), axis);
+        for(int i = 0; i < dataOut.length; i++) dataOut[i] /= expSums[i];
+        
+        Tensor t_B;
+        if (m_gradEnabled) {
+            List<Tensor> children = new ArrayList<>();
+            children.add(this);
+
+            t_B = new Tensor(m_shape, dataOut, m_gradEnabled, children);
+            Backward back = () -> {};
+            t_B.m_backward = back;
+        } else {
+            t_B = new Tensor(m_shape, dataOut);
+        }
+
+        return t_B;
+    }
+
+    public Tensor max(int axis){
+        throw new UnsupportedOperationException();
+    }
+
+    public Tensor min(int axis){
+        throw new UnsupportedOperationException();
+    }
+
+    public Tensor sum(int axis){
+        throw new UnsupportedOperationException();
+    }
+
+    public Tensor prod(int axis){
+        throw new UnsupportedOperationException();
+    }
+
+    private int[] removeDim(int[] shapeIn, int axis){
+        if (axis > shapeIn.length-1 || axis < 0) throw new IndexOutOfBoundsException("Error: axis is out of bounds for the given shape.");
+
+        int[] shapeOut = new int[shapeIn.length-1];
+        int outIdx = 0;
+        for(int i = 0; i < shapeIn.length && outIdx < shapeOut.length; i++){
+            if (i == axis) i++;
+            shapeOut[outIdx] = shapeIn[i];
+            outIdx++;
+        }
+        
+        return shapeOut;
+    }
+
+    private double[] fillDataAlong(List<int[]> partitions, double[] fillData, int axis){
+        if (partitions.size() != fillData.length) throw new IllegalArgumentException("Error: number of elements in data and partition should be equal.");
+
+        double[] data = new double[m_data.length];
+        for(int i = 0; i < partitions.size(); i++){
+            TensorIterator it = new TensorIterator(partitions.get(i), axis);
+            while (it.hasNext()){
+                data[storageIndex(it.m_pos)] = fillData[i];
+                it.next();
+            }
+        }
+
+        return data;
+    }
+
+    private double[] getSumsAlong(int axis){
+        List<int[]> indices = getIndicesAlong(axis);
+        double[] sums = new double[indices.size()];
+        for(int i = 0; i < sums.length; i++){
+            double sum = 0;
+            int[] idx = indices.get(i);
+            TensorIterator it = new TensorIterator(idx.clone(), axis);
+            while(it.hasNext()) sum += it.next();
+            sums[i] = sum;
+        }
+
+        return sums;
+    }
+
+    private double[] getSumsAlong(int axis, double[] data){
+        List<int[]> indices = getIndicesAlong(axis);
+        double[] sums = new double[indices.size()];
+        for(int i = 0; i < sums.length; i++){
+            double sum = 0;
+            int[] idx = indices.get(i);
+            TensorIterator it = new TensorIterator(idx.clone(), axis);
+            it.it_data = data;
+            while(it.hasNext()) sum += it.next();
+            sums[i] = sum;
+        }
+
+        return sums;
+    }
+
+    private double[] getMaxAlong(int axis){
+        List<int[]> indices = getIndicesAlong(axis);
+        double[] maxes = new double[indices.size()];
+        for(int i = 0; i < maxes.length; i++){
+            double max = Integer.MIN_VALUE;
+            int[] idx = indices.get(i);
+            TensorIterator it = new TensorIterator(idx.clone(), axis);
+            while(it.hasNext()) max = Math.max(max, it.next());
+            maxes[i] = max;
+        }
+        
+        return maxes;
+    }
+
+    private List<int[]> getIndicesAlong(int axis){
+        if (axis >= m_shape.length) throw new IllegalArgumentException("Error: axis " + axis + " out of bounds for shape " + formatShape() + ".");
+        LinkedList<int[]> indexList = new LinkedList<>();
+        insertIndicesAlong(indexList, axis, 0, new int[m_shape.length]);
+        return indexList;
+    }
+
+    private void insertIndicesAlong(List<int[]> indexList, int alongAxis, int idx, int[] indices){
+        if (idx == m_shape.length-1){
+            if(alongAxis == idx){
+                indexList.add(indices);
+            } else{
+                for(int i=0; i< m_shape[idx]; i++){
+                    int[] tempIndex = indices.clone();
+                    tempIndex[idx] = i;
+                    indexList.add(tempIndex);
+                }
+            }
+        } else if (idx == alongAxis) {
+            insertIndicesAlong(indexList, alongAxis, idx+1, indices);
+        } else {
+            for(int i=0; i < m_shape[idx]; i++){
+                int[] tempIndex = indices.clone();
+                tempIndex[idx] = i;
+                insertIndicesAlong(indexList, alongAxis, idx+1, tempIndex);
+            }
+        }
+    }
+
     // --------------------------
     //    BINARY OPERATIONS
     // --------------------------
@@ -451,11 +593,12 @@ public class Tensor {
             
             double dataOut[] = new double[this.m_shape[0] * t_B.m_shape[1]];
             int[] shapeOut = new int[] {this.m_shape[0], t_B.m_shape[1]};
+            DataRepresentation layoutOut = (dataLayout == DataRepresentation.ROW_MAJOR || t_B.dataLayout == DataRepresentation.ROW_MAJOR) ? DataRepresentation.ROW_MAJOR : dataLayout;
     
             for(int r = 0; r < this.m_shape[0]; r++){
                 for(int c = 0; c < t_B.m_shape[1]; c++){
                     for(int k = 0; k < t_B.m_shape[0]; k++){
-                        dataOut[storageIndex(new int[]{r, c})] += m_data[storageIndex(new int[]{r, k})] * t_B.m_data[storageIndex(new int[]{k, c})];
+                        dataOut[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, layoutOut)] += m_data[storageIndex(new int[]{r, k})] * t_B.m_data[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)];
                     }
                 }
             }
@@ -600,5 +743,33 @@ public class Tensor {
         }
         s.append(")");
         return s.toString();
+    }
+
+    public Iterator<Double> iterator(int[] start, int axis){
+        return new TensorIterator(start, axis);
+    }
+
+    private class TensorIterator implements Iterator<Double>{
+        private int[] m_pos;
+        private double[] it_data;
+        private int m_axis;
+
+        TensorIterator(int[] start, int axis){
+            m_pos = start;
+            m_axis = axis;
+            it_data = m_data;
+        }
+
+        @Override
+        public boolean hasNext(){
+            return m_pos[m_axis] < m_shape[m_axis];
+        }
+
+        @Override
+        public Double next(){
+            double n_val = it_data[storageIndex(m_pos)];
+            m_pos[m_axis]++;
+            return n_val;
+        }
     }
 }

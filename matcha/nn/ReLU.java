@@ -7,7 +7,7 @@ import matcha.engine.Tensor;
 public class ReLU extends Module{
 
     @Override
-    Tensor forward(Tensor x) throws Exception {
+    Tensor forward(Tensor x){
         return x.relu();
     }
 
