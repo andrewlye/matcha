@@ -1,5 +1,9 @@
 package matcha.engine.threads;
 
+import java.sql.RowIdLifetime;
+
+import javax.xml.crypto.Data;
+
 import matcha.engine.DataRepresentation;
 import matcha.engine.Tensor;
 import matcha.utils.math.LinAlg;
@@ -12,7 +16,8 @@ public class matMulThread {
     Tensor t_b;
     int step;
     char part;
-    public DataRepresentation dataLayout;
+    private DataRepresentation m_dataLayoutA;
+    private DataRepresentation m_dataLayoutB;
 
     class Worker extends Thread {
         int i;
@@ -42,26 +47,28 @@ public class matMulThread {
             for(int r = rStart; r < rEnd; r++){
                 for(int c = cStart; c < cEnd; c++){
                     for(int k = kStart; k < kEnd; k++){
-                        data[storageIndex(new int[]{r, c})] += t_a.data()[storageIndex(new int[]{r, k})] * t_b.data()[storageIndex(new int[]{k, c})];
+                        data[storageIndex(data.length, shape, new int[]{r, c}, m_dataLayoutA)] += t_a.data()[storageIndex(t_a.data().length, t_a.shape(), new int[]{r, k}, m_dataLayoutA)] * t_b.data()[storageIndex(t_b.data().length, t_b.shape(), new int[]{k, c}, m_dataLayoutB)];
                     }
                 }
             }
         }
 
-        private int storageIndex(int[] idxs){
-            switch (dataLayout) {
+        private int storageIndex(int length, int[] shape, int[] idxs, DataRepresentation layout){
+            switch (layout) {
             case ROW_MAJOR: 
             default:
-                return LinAlg.rmo(data.length, shape, idxs);
+                return LinAlg.rmo(length, shape, idxs);
             }
         }
     }
 
-    public matMulThread(Tensor t_a, Tensor t_b, int[] shape, DataRepresentation layout){
+    public matMulThread(Tensor t_a, Tensor t_b, int[] shape){
         data = new double[t_a.shape()[0] * t_b.shape()[1]];
         this.shape = shape;
         this.t_a = t_a;
         this.t_b = t_b;
+        this.m_dataLayoutA = t_a.dataLayout;
+        this.m_dataLayoutB = t_b.dataLayout;
         
         if (t_a.shape()[0] >= t_b.shape()[1] && t_a.shape()[0] >= t_b.shape()[0]){
             part = 'r';

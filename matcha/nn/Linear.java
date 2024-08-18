@@ -40,7 +40,7 @@ public class Linear extends Module{
 
     @Override
     public Tensor forward(Tensor x) throws Exception {
-        return x.matmul(wandb, false);
+        return x.matmul(wandb, true);
     }
 
     @Override

@@ -408,7 +408,7 @@ public class Tensor {
             
             int[] shapeOut = new int[] {this.m_shape[0], t_B.m_shape[1]};
     
-            matMulThread mm = new matMulThread(this, t_B, shapeOut, dataLayout);
+            matMulThread mm = new matMulThread(this, t_B, shapeOut);
             double dataOut[] = mm.matMul();
     
     
@@ -424,12 +424,8 @@ public class Tensor {
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                try {
-                                    this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(new int[]{k, c})] * t_C.m_grad[storageIndex(new int[]{r, c})];
-                                    t_B.m_grad[storageIndex(new int[]{k, c})] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(new int[]{r, c})];
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                t_B.m_grad[storageIndex(t_B.m_data.length, t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
@@ -476,12 +472,8 @@ public class Tensor {
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                try {
-                                    this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(new int[]{k, c})] * t_C.m_grad[storageIndex(new int[]{r, c})];
-                                    t_B.m_grad[storageIndex(new int[]{k, c})] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(new int[]{r, c})];
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                t_B.m_grad[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
@@ -503,6 +495,14 @@ public class Tensor {
         case ROW_MAJOR: 
         default:
             return LinAlg.rmo(m_data.length, m_shape, idxs);
+        }
+    }
+
+    private int storageIndex(int length, int[] shape, int[] idxs, DataRepresentation layout){
+        switch (layout) {
+        case ROW_MAJOR: 
+        default:
+            return LinAlg.rmo(length, shape, idxs);
         }
     }
 
