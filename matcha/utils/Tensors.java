@@ -40,6 +40,8 @@ public class Tensors {
      * @return
      */
     private static String toString(double[] data, int[] shape, int[] idxs, int d, StringBuilder sb, DataRepresentation data_layout){
+        if (shape.length == 1) return Arrays.toString(data);
+        
         if (d == shape.length - 2){
             sb.append("[");
             idxs[d+1] = -1;

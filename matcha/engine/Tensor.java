@@ -26,6 +26,7 @@ public class Tensor implements Iterable<Double>{
 
     protected List<Tensor> m_prev;
     protected Backward m_backward; // backprop handling for this tensor.
+    protected gradFunctions m_gradFn = gradFunctions.None;
 
     public DataRepresentation dataLayout = DataRepresentation.ROW_MAJOR;
 
@@ -48,14 +49,6 @@ public class Tensor implements Iterable<Double>{
             numElements *= shape[i];
         if (data != null && numElements != data.length) 
             throw new IllegalArgumentException("Error: number of elements specified by dimensions (" + numElements +  ") are inconsistent with the length of data provided (" + data.length + ").");
-
-        // single-element shapes (shape = [d]) become column vectors (shape' = [d, 1]).
-        if (shape.length == 1){
-            int[] colVec = new int[2];
-            colVec[0] = shape[0];
-            colVec[1] = 1;
-            shape = colVec;
-        }
 
         this.m_shape = shape;
         this.m_data = (data != null) ? data : new double[numElements];
@@ -143,6 +136,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_B.m_backward = back;
+            t_B.m_gradFn = gradFunctions.ScalarMulBackward;
         } else {
             t_B = new Tensor(m_shape, dOut);
         }
@@ -183,6 +177,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_B.m_backward = back;
+            t_B.m_gradFn = gradFunctions.ScalarPowBackward;
         } else {
             t_B = new Tensor(m_shape, dOut);
         }
@@ -211,6 +206,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_B.m_backward = back;
+            t_B.m_gradFn = gradFunctions.ExpBackward;
     
         } else {
             t_B = new Tensor(m_shape, dOut);
@@ -271,6 +267,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
+            t_B.m_gradFn = gradFunctions.AddBackward;
 
         } else {
             t_C = new Tensor(this.m_shape, dOut);
@@ -320,6 +317,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
+            t_B.m_gradFn = gradFunctions.MulBackward;
         }
         else {
             t_C = new Tensor(m_shape, dOut);
@@ -369,6 +367,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
+            t_B.m_gradFn = gradFunctions.PowBackward;
     
         } else {
             t_C = new Tensor(m_shape, dOut);
@@ -433,6 +432,7 @@ public class Tensor implements Iterable<Double>{
                 };
     
                 t_C.m_backward = back;
+                t_B.m_gradFn = gradFunctions.MatrixMultiplyBackward;
     
             } else {
                 t_C = new Tensor(shapeOut, dataOut);
@@ -482,6 +482,7 @@ public class Tensor implements Iterable<Double>{
                 };
     
                 t_C.m_backward = back;
+                t_B.m_gradFn = gradFunctions.MatrixMultiplyBackward;
     
             } else {
                 t_C = new Tensor(shapeOut, dataOut);
@@ -552,7 +553,11 @@ public class Tensor implements Iterable<Double>{
 
     @Override
     public String toString() {
-        return "Tensor(shape: " + formatShape() + ", grad_enabled=" + m_gradEnabled + ")";
+        if (m_gradEnabled){
+            if (m_gradFn != gradFunctions.None) return "Tensor(shape: " + formatShape() + ", gradFn=<" + m_gradFn + ">)";
+            else return "Tensor(shape: " + formatShape() + ", gradEnabled=true>)";
+        } else
+            return "Tensor(shape: " + formatShape() + ")";
     }
 
     public String formatShape(){

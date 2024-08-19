@@ -41,6 +41,7 @@ public final class FN_Activations {
                 }
             };
             t_B.m_backward = back;
+            t_B.m_gradFn = gradFunctions.TanhBackward;
     
         } else {
             t_B = new Tensor(t_A.m_shape, dOut);
@@ -71,6 +72,7 @@ public final class FN_Activations {
                 }
             };
             t_B.m_backward = back;
+            t_B.m_gradFn = gradFunctions.ReLUBackward;
     
         } else {
             t_B = new Tensor(t_A.m_shape, dOut);
@@ -155,6 +157,7 @@ public final class FN_Activations {
                 }
             };
             t_B.m_backward = back;
+            t_B.m_gradFn = gradFunctions.SoftmaxBackward;
         } else {
             t_B = new Tensor(t_A.m_shape, dataOut);
         }
