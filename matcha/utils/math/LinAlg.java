@@ -32,7 +32,7 @@ public class LinAlg {
         int[] diagIndex = new int[shape.length];
         for(int i = 0; i < min(shape); i++){
             diagIndex = fill(diagIndex, i);
-            data[rmo(data.length, shape, diagIndex)] = dVal;
+            data[rmo(shape, diagIndex)] = dVal;
         }
 
         return new Tensor(shape, data, gradEnabled);
@@ -45,7 +45,7 @@ public class LinAlg {
         int[] diagIndex = new int[shape.length];
         for(int i = 0; i < min(shape); i++){
             diagIndex = fill(diagIndex, i);
-            data[rmo(data.length, shape, diagIndex)] = dVal[i];
+            data[rmo(shape, diagIndex)] = dVal[i];
         }
 
         return new Tensor(shape, data, gradEnabled);
@@ -72,20 +72,13 @@ public class LinAlg {
     /**
      * Returns the Row-Major index of an element in a list of elements, parametrized by the given shape and in-shape index.
      * For more information, see https://en.wikipedia.org/wiki/Row-_and_column-major_order#
-     * @param elements the list of elements.
      * @param shape the shape in which to parametrize the elements.
      * @param idxs the shape-indices of the element to retrieve.
-     * @return The index of the list element associated at the shape index in row-major order.
+     * @return The data index of the element associated at the shape index in row-major order.
      */
-    public static int rmo(int elements, int[] shape, int[] idxs){
+    public static int rmo(int[] shape, int[] idxs){
         if (shape.length != idxs.length) {
             throw new IllegalArgumentException("Error: number of indexes must match dimensionality of object!");
-        } 
-
-        int elementsInShape = 1;
-        for(int i = 0; i < shape.length; i++) elementsInShape *= shape[i];
-        if (elements != elementsInShape){
-            throw new IllegalArgumentException("Error: the number of elements specified by the shape does not match the data.");
         }
 
         for (int i = 0; i < idxs.length; i++) {

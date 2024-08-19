@@ -47,17 +47,17 @@ public class matMulThread {
             for(int r = rStart; r < rEnd; r++){
                 for(int c = cStart; c < cEnd; c++){
                     for(int k = kStart; k < kEnd; k++){
-                        data[storageIndex(data.length, shape, new int[]{r, c}, m_dataLayoutA)] += t_a.data()[storageIndex(t_a.data().length, t_a.shape(), new int[]{r, k}, m_dataLayoutA)] * t_b.data()[storageIndex(t_b.data().length, t_b.shape(), new int[]{k, c}, m_dataLayoutB)];
+                        data[storageIndex(shape, new int[]{r, c}, m_dataLayoutA)] += t_a.data()[storageIndex(t_a.shape(), new int[]{r, k}, m_dataLayoutA)] * t_b.data()[storageIndex(t_b.shape(), new int[]{k, c}, m_dataLayoutB)];
                     }
                 }
             }
         }
 
-        private int storageIndex(int length, int[] shape, int[] idxs, DataRepresentation layout){
+        private int storageIndex(int[] shape, int[] idxs, DataRepresentation layout){
             switch (layout) {
             case ROW_MAJOR: 
             default:
-                return LinAlg.rmo(length, shape, idxs);
+                return LinAlg.rmo(shape, idxs);
             }
         }
     }

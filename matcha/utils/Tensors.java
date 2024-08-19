@@ -57,7 +57,7 @@ public class Tensors {
                 
                 switch(data_layout){
                 case ROW_MAJOR:
-                default: sb.append(data[LinAlg.rmo(data.length, shape, idxs)]);
+                default: sb.append(data[LinAlg.rmo(shape, idxs)]);
                 }
                 
                 if (i != shape[d] * shape[d+1] - 1)

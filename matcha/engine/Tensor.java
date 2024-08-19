@@ -531,8 +531,8 @@ public class Tensor implements Iterable<Double>{
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
-                                t_B.m_grad[storageIndex(t_B.m_data.length, t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                t_B.m_grad[storageIndex(t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
@@ -563,7 +563,7 @@ public class Tensor implements Iterable<Double>{
             for(int r = 0; r < this.m_shape[0]; r++){
                 for(int c = 0; c < t_B.m_shape[1]; c++){
                     for(int k = 0; k < t_B.m_shape[0]; k++){
-                        dataOut[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, layoutOut)] += m_data[storageIndex(new int[]{r, k})] * t_B.m_data[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)];
+                        dataOut[storageIndex(shapeOut, new int[]{r, c}, layoutOut)] += m_data[storageIndex(new int[]{r, k})] * t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)];
                     }
                 }
             }
@@ -580,8 +580,8 @@ public class Tensor implements Iterable<Double>{
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
-                                t_B.m_grad[storageIndex(t_B.m_data.length, t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(dataOut.length, shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                t_B.m_grad[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
@@ -783,31 +783,27 @@ public class Tensor implements Iterable<Double>{
     }
 
     /**
-     * Gets the index in the data array of the element at tensor index (i, j, k, ...) depending on its data representation.
+     * Gets the index in the data array of this tensor of the element at tensor index (i, j, k, ...) depending on its data representation.
      * @param idxs the element index in the tensor.
      * @return the data index of this element.
      */
     private int storageIndex(int[] idxs){
-        switch (dataLayout) {
-        case ROW_MAJOR: 
-        default:
-            return LinAlg.rmo(m_data.length, m_shape, idxs);
-        }
+        return storageIndex(m_shape, idxs, dataLayout);
     }
 
     /**
-     * 
-     * @param length
-     * @param shape
-     * @param idxs
-     * @param layout
-     * @return
+     * Gets the index in the data array of the element at tensor index (i, j, k, ...) depending on its data representation.
+     * @param length the number of elements in the tensor.
+     * @param shape the shape of the tensor.
+     * @param idxs the element index in the tensor.
+     * @param layout the data representation used.
+     * @return the data index of this element.
      */
-    private int storageIndex(int length, int[] shape, int[] idxs, DataRepresentation layout){
+    private int storageIndex(int[] shape, int[] idxs, DataRepresentation layout){
         switch (layout) {
         case ROW_MAJOR: 
         default:
-            return LinAlg.rmo(length, shape, idxs);
+            return LinAlg.rmo(shape, idxs);
         }
     }
 
