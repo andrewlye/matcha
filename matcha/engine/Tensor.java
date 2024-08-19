@@ -26,7 +26,7 @@ public class Tensor implements Iterable<Double>{
 
     protected List<Tensor> m_prev;
     protected Backward m_backward; // backprop handling for this tensor.
-    protected gradFunctions m_gradFn = gradFunctions.None;
+    protected GradFunctions m_gradFn = GradFunctions.None;
 
     public DataRepresentation dataLayout = DataRepresentation.ROW_MAJOR;
 
@@ -88,7 +88,7 @@ public class Tensor implements Iterable<Double>{
     /**
      * Transposes a N-dimensional tensor using a list of axes for the dimension mapping.
      * @param axes a permutation (0, 1, 2, ..., N-1) of the shape indices for the transposed tensor.
-     * @return The tranapose of the tensor being called along the specified axes.
+     * @return The transpose of the tensor being called along the specified axes.
      */
     public Tensor T(int[] axes){
         if (axes.length != m_shape.length) throw new IllegalArgumentException("Error: axes must contain a permutation of the tensor shape.");
@@ -136,7 +136,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_B.m_backward = back;
-            t_B.m_gradFn = gradFunctions.ScalarMulBackward;
+            t_B.m_gradFn = GradFunctions.ScalarMulBackward;
         } else {
             t_B = new Tensor(m_shape, dOut);
         }
@@ -177,7 +177,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_B.m_backward = back;
-            t_B.m_gradFn = gradFunctions.ScalarPowBackward;
+            t_B.m_gradFn = GradFunctions.ScalarPowBackward;
         } else {
             t_B = new Tensor(m_shape, dOut);
         }
@@ -206,7 +206,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_B.m_backward = back;
-            t_B.m_gradFn = gradFunctions.ExpBackward;
+            t_B.m_gradFn = GradFunctions.ExpBackward;
     
         } else {
             t_B = new Tensor(m_shape, dOut);
@@ -267,7 +267,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
-            t_B.m_gradFn = gradFunctions.AddBackward;
+            t_B.m_gradFn = GradFunctions.AddBackward;
 
         } else {
             t_C = new Tensor(this.m_shape, dOut);
@@ -317,7 +317,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
-            t_B.m_gradFn = gradFunctions.MulBackward;
+            t_B.m_gradFn = GradFunctions.MulBackward;
         }
         else {
             t_C = new Tensor(m_shape, dOut);
@@ -367,7 +367,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
-            t_B.m_gradFn = gradFunctions.PowBackward;
+            t_B.m_gradFn = GradFunctions.PowBackward;
     
         } else {
             t_C = new Tensor(m_shape, dOut);
@@ -432,7 +432,7 @@ public class Tensor implements Iterable<Double>{
                 };
     
                 t_C.m_backward = back;
-                t_B.m_gradFn = gradFunctions.MatrixMultiplyBackward;
+                t_B.m_gradFn = GradFunctions.MatrixMultiplyBackward;
     
             } else {
                 t_C = new Tensor(shapeOut, dataOut);
@@ -482,7 +482,7 @@ public class Tensor implements Iterable<Double>{
                 };
     
                 t_C.m_backward = back;
-                t_B.m_gradFn = gradFunctions.MatrixMultiplyBackward;
+                t_B.m_gradFn = GradFunctions.MatrixMultiplyBackward;
     
             } else {
                 t_C = new Tensor(shapeOut, dataOut);
@@ -498,49 +498,96 @@ public class Tensor implements Iterable<Double>{
     //       ACCESS
     // --------------------
 
+    /**
+     * @return the data stored by this tensor.
+     */
     public double[] data() {
         return m_data;
     }
 
+    /**
+     * @return the gradient data stored by this tensor.
+     */
     public double[] grad() {
         return m_grad;
     }
 
+    /**
+     * @return if gradients are enabled for this tensor.
+     */
     public boolean gradEnabled() {
         return m_gradEnabled;
     }
 
+    /**
+     * @return the shape of this tensor.
+     */
     public int[] shape() {
         return m_shape;
     }
 
+    /**
+     * @return the number of elements in this tensor (i.e. product of its dimensions);
+     */
+    public int size() {
+        int numElements = 1;
+        for (int i = 0; i < m_shape.length; i++)
+            numElements *= m_shape[i];
+        return numElements;
+    }
+
+    /**
+     * @param idxs array indices (x,y,z,...) of the same length as the shape.
+     * @return the element stored at tensor index idx.
+     */
     public double get(int[] idxs) {
         return m_data[storageIndex(idxs)];
     }
 
+    /**
+     * Sets the element stored at tensor index idx to x.
+     * @param idxs array indices (x,y,z,...) of the same length as the shape.
+     * @param x double value to set.
+     */
     public void set(int[] idxs, double x) {
         m_data[storageIndex(idxs)] = x;
     }
 
+    /**
+     * Set the entire data stored in this tensor.
+     * @param data the data to set to this tensor.
+     */
     public void setData(double[] data) {
         if (data.length != m_data.length) throw new IllegalArgumentException("Error: input data must be of the same length as the number of elements specified by the shape of the tensor.");
         m_data = data;
     }
 
+    // wrapper for setGradient(double[] grad);
     public void setGrad(double[] grad){
         setGradient(grad);
     }
 
+    /**
+    * Set the entire gradient data stored in this tensor.
+    * @param data the gradient data to set to this tensor.
+    */
     public void setGradient(double[] grad) {
         if (m_gradEnabled && grad.length == m_data.length)
             this.m_grad = grad;
     }
 
+    /**
+     * Zeros the gradient in this tensor.
+     */
     public void zeroGrad() {
         if (m_gradEnabled)
             m_grad = new double[m_grad.length];
     }
 
+    /**
+     * Enables/disables gradients in this tensor.
+     * @param g If true, enables gradients. If false, disables gradients.
+     */
     public void withGrad(boolean g){
         m_gradEnabled = g;
         if (m_gradEnabled){
@@ -551,15 +598,22 @@ public class Tensor implements Iterable<Double>{
         }
     }
 
+    /**
+     * @return string representation of tensor.
+     * Note: this does not print out the actual values in tensor form. Use matcha.utils.Tensors.toString(Tensor) for this.
+     */
     @Override
     public String toString() {
         if (m_gradEnabled){
-            if (m_gradFn != gradFunctions.None) return "Tensor(shape: " + formatShape() + ", gradFn=<" + m_gradFn + ">)";
+            if (m_gradFn != GradFunctions.None) return "Tensor(shape: " + formatShape() + ", gradFn=<" + m_gradFn + ">)";
             else return "Tensor(shape: " + formatShape() + ", gradEnabled=true>)";
         } else
             return "Tensor(shape: " + formatShape() + ")";
     }
 
+    /**
+     * @return string representation of the shape of the tensor.
+     */
     public String formatShape(){
         StringBuilder s = new StringBuilder("(");
         for (int i = 0;  i < m_shape.length; i++){
@@ -674,26 +728,20 @@ public class Tensor implements Iterable<Double>{
         }
     }
 
+    /**
+     * Run backpropagation starting from this tensor with default (1.0) gradients.
+     */
     public void backward(){
-        if (!m_gradEnabled)
-            throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
+        double[] gradient = new double[m_grad.length];
+        for (int i = 0; i < m_grad.length; i++) m_grad[i] = 1.0;
 
-        List<Tensor> ordering = new ArrayList<>();
-        buildTopo(this, new HashSet<>(), ordering);
-        Collections.reverse(ordering);
-
-        for (int i = 0; i < m_grad.length; i++){
-            m_grad[i] = 1.0;
-        }
-
-        for(Tensor val : ordering){
-            if (!val.m_gradEnabled)
-                System.out.println("Warning: some tensors encountered in backprop have gradients disabled.");
-            else
-            val.m_backward.pass();
-        }
+        backward(gradient);
     }
 
+    /**
+     * Run backpropagation starting from this tensor with specified gradients.
+     * @param gradient the gradient to set to this tensor.
+     */
     public void backward(double[] gradient){
         if (!m_gradEnabled)
             throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
@@ -708,17 +756,27 @@ public class Tensor implements Iterable<Double>{
 
         for(Tensor val : ordering){
             if (!val.m_gradEnabled)
-                System.out.println("Warning: some tensors encountered in backprop have gradients disabled.");
+                System.out.println("Warning: some tensors encountered in this backpropagation run have gradients disabled.");
             else
             val.m_backward.pass();
         }
     }
 
+    /**
+     * Increments each element in this tensor by its corresponding gradient * step size.
+     * @param step_size the amount to scale each gradient by.
+     */
     public void step(double step_size) {
         for(int i = 0; i < m_data.length; i++)
             m_data[i] += step_size*m_grad[i];
     }
 
+    /**
+     * Builds a topological ordering of Tensors.
+     * @param parent current node parent.
+     * @param visited set of visited nodes/tensots.
+     * @param ordering topological ordering to return.
+     */
     private void buildTopo(Tensor parent, Set<Tensor> visited, List<Tensor> ordering) {
         if (!visited.contains(parent)) {
             visited.add(parent);
@@ -731,37 +789,50 @@ public class Tensor implements Iterable<Double>{
         }
     }
 
+    /**
+     * @return TensorIterator of this tensor
+     */
     @Override
     public TensorIterator iterator() {
         return new TensorIterator();
     }
 
+    /**
+     * @param start starting location for thie Tensor.
+     * @param axis the axis to iterate over.
+     * @return AxisIterator for this tensor at location start along the specified axis.
+     */
     public AxisIterator iterator(int[] start, int axis){
         return new AxisIterator(start, axis);
     }
 
+    /**
+     * AxisIterator class, useful for many functionals.
+     * Iterates across the Tensor along the direction of it_axis, starting at a specified location.
+     * This behaviour is useful for iterating over samples in batches, and across feature dimensions.
+     */
     protected class AxisIterator implements Iterator<Double>{
         protected int[] it_pos;
         protected double[] it_data;
-        protected int it_xis;
+        protected int it_axis;
         protected int it_iter;
 
         AxisIterator(int[] start, int axis){
             it_pos = start;
-            it_xis = axis;
+            it_axis = axis;
             it_data = m_data;
             it_iter = 0;
         }
 
         @Override
         public boolean hasNext(){
-            return it_pos[it_xis] < m_shape[it_xis];
+            return it_pos[it_axis] < m_shape[it_axis];
         }
 
         @Override
         public Double next(){
             double it_val = it_data[storageIndex(it_pos)];
-            it_pos[it_xis]++;
+            it_pos[it_axis]++;
             it_iter++;
             return it_val;
         }
@@ -769,15 +840,20 @@ public class Tensor implements Iterable<Double>{
         public int iter(){ return it_iter; }
     }
 
+    /**
+     * Iterator class for this Tensor. Iterates across Tensor elements in increasing order.
+     * Ex: For a 2x3x2 Tensor:
+     * [0, 0, 0] -> [0, 0, 1] -> [0, 1, 0] -> [0, 1, 1] -> [0, 2, 0] -> [0, 2, 1] -> [1, 0, 0] -> [1, 0, 1] -> [1, 1, 0] -> [1, 1, 1] -> [1, 2, 0] -> [1, 2, 1].
+     */
     public class TensorIterator implements Iterator<Double>{
         protected int[] it_pos;
-        protected int it_iter;
+        protected int it_iter; // current iteration 
         protected int it_curAxis;
 
         TensorIterator(){
             it_pos = new int[m_shape.length];
             it_pos[m_shape.length-1] = -1;
-            it_iter = 0;
+            it_iter = -1;
             it_curAxis = m_shape.length - 1;
         }
 
@@ -801,6 +877,8 @@ public class Tensor implements Iterable<Double>{
             } else{
                 it_pos[it_curAxis] += 1;
             }
+
+            it_iter++;
 
             double it_val = m_data[storageIndex(it_pos)];
 

@@ -1,6 +1,6 @@
 package matcha.engine;
 
-public enum gradFunctions {
+public enum GradFunctions {
     None,
     ScalarMulBackward,
     ScalarPowBackward,
@@ -13,4 +13,7 @@ public enum gradFunctions {
     ReLUBackward,
     SoftmaxBackward,
     CrossEntropyBackward,
+    MeanLogLossBackward,
+    SumLogLossBackward,
+    LogLossBackward,
 }

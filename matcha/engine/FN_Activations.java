@@ -41,7 +41,7 @@ public final class FN_Activations {
                 }
             };
             t_B.m_backward = back;
-            t_B.m_gradFn = gradFunctions.TanhBackward;
+            t_B.m_gradFn = GradFunctions.TanhBackward;
     
         } else {
             t_B = new Tensor(t_A.m_shape, dOut);
@@ -72,7 +72,7 @@ public final class FN_Activations {
                 }
             };
             t_B.m_backward = back;
-            t_B.m_gradFn = gradFunctions.ReLUBackward;
+            t_B.m_gradFn = GradFunctions.ReLUBackward;
     
         } else {
             t_B = new Tensor(t_A.m_shape, dOut);
@@ -82,7 +82,7 @@ public final class FN_Activations {
     }
 
     /**
-     * Applies the softmax activation function along a specified axis.
+     * Applies the softmax activation function to an n-dimensional input tensor along a specified axis.
      * Unary operation: softmax(A) = B, where B is the same shape as A.
      * This is a public wrapper for softmaxFunc(int axis) so that an axis of -1 can be used.
      * There is definitely a cleaner way to do this.
@@ -96,7 +96,7 @@ public final class FN_Activations {
     }
 
     /**
-     * Applies the softmax activation function along a specified axis.
+     * Applies the softmax activation function to an n-dimensional input tensor along a specified axis.
      * Unary operation: softmax(A) = B, where B is the same shape as A.
      * @param t_A, the tensor to call this operation on.
      * @param axis a dimension along which Softmax will be computed (so every slice along dim will sum to 1).
@@ -157,7 +157,7 @@ public final class FN_Activations {
                 }
             };
             t_B.m_backward = back;
-            t_B.m_gradFn = gradFunctions.SoftmaxBackward;
+            t_B.m_gradFn = GradFunctions.SoftmaxBackward;
         } else {
             t_B = new Tensor(t_A.m_shape, dataOut);
         }
