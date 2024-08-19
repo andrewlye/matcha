@@ -3,12 +3,13 @@ package matcha.nn;
 import java.util.List;
 
 import matcha.engine.Tensor;
+import matcha.engine.FN_Activations;;
 
 public class Tanh extends Module{
 
     @Override
     Tensor forward(Tensor x){
-        return x.tanh();
+        return FN_Activations.tanh(x);
     }
 
 

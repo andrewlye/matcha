@@ -3,12 +3,13 @@ package matcha.nn;
 import java.util.List;
 
 import matcha.engine.Tensor;
+import matcha.engine.FN_Activations;
 
 public class ReLU extends Module{
 
     @Override
     public Tensor forward(Tensor x){
-        return x.relu();
+        return FN_Activations.relu(x);
     }
 
     @Override

@@ -3,6 +3,7 @@ package matcha.nn;
 import java.util.List;
 
 import matcha.engine.Tensor;
+import matcha.engine.FN_Activations;;
 
 public class Softmax extends Module{
 
@@ -14,7 +15,7 @@ public class Softmax extends Module{
 
     @Override
     public Tensor forward(Tensor x){
-        return x.softmax(m_axis);
+        return FN_Activations.softmax(x, m_axis);
     }
 
     @Override

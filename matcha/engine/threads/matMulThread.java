@@ -1,9 +1,5 @@
 package matcha.engine.threads;
 
-import java.sql.RowIdLifetime;
-
-import javax.xml.crypto.Data;
-
 import matcha.engine.DataRepresentation;
 import matcha.engine.Tensor;
 import matcha.utils.math.LinAlg;
@@ -70,6 +66,7 @@ public class matMulThread {
         this.m_dataLayoutA = t_a.dataLayout;
         this.m_dataLayoutB = t_b.dataLayout;
         
+        // thread along the largest dimension for largest increase in efficiency.
         if (t_a.shape()[0] >= t_b.shape()[1] && t_a.shape()[0] >= t_b.shape()[0]){
             part = 'r';
             step = (int) Math.ceil((double) t_a.shape()[0] / MAX_THREADS);

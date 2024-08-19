@@ -17,15 +17,15 @@ import java.util.Set;
  * @author andrewye
  */
 public class Tensor implements Iterable<Double>{
-    private int[] m_shape; // shape of tensor
+    protected int[] m_shape; // shape of tensor
     // is true if gradients need to be computed for this tensor.
-    private boolean m_gradEnabled;
+    protected boolean m_gradEnabled;
     // data is stored as a 1-d array in memory, with shapes being row-major indexed. See https://pytorch.org/docs/stable/storage.html
-    private double[] m_data;
-    private double[] m_grad;
+    protected double[] m_data;
+    protected double[] m_grad;
 
-    private List<Tensor> m_prev;
-    private Backward m_backward; // backprop handling for this tensor.
+    protected List<Tensor> m_prev;
+    protected Backward m_backward; // backprop handling for this tensor.
 
     public DataRepresentation dataLayout = DataRepresentation.ROW_MAJOR;
 
@@ -78,7 +78,7 @@ public class Tensor implements Iterable<Double>{
     }
 
     // Private constructor used for auto differentiation and chain-ruling.
-    private Tensor(int[] shape, double[] data, boolean gradEnabled, List<Tensor> children){
+    protected Tensor(int[] shape, double[] data, boolean gradEnabled, List<Tensor> children){
         this(shape, data, gradEnabled);
         this.m_prev = children;
     }
@@ -100,12 +100,12 @@ public class Tensor implements Iterable<Double>{
     public Tensor T(int[] axes){
         if (axes.length != m_shape.length) throw new IllegalArgumentException("Error: axes must contain a permutation of the tensor shape.");
         double[] dataOut = new double[m_data.length];
-        int[] shapeOut = remap(m_shape, axes);
+        int[] shapeOut = remap(m_shape, axes); // remap shape according to transpose axes
         Tensor t_B = new Tensor(shapeOut, m_gradEnabled);
-        t_B.dataLayout = dataLayout;
+        t_B.dataLayout = dataLayout; // make sure the transpose shares the same representation format
 
         TensorIterator it = this.iterator();
-        while(it.hasNext()){
+        while(it.hasNext()){ // cycle through and map all indices in the current tensor to their transpose.
             double n = it.next();
             dataOut[t_B.storageIndex(remap(it.it_pos, axes))] = n;
         }
@@ -176,6 +176,7 @@ public class Tensor implements Iterable<Double>{
             children.add(this);
     
             t_B = new Tensor(m_shape, dOut, m_gradEnabled, children);
+            // d/dx x^n = n*x^(n-1)
             Backward back = () -> {
                 for(int i = 0; i < m_grad.length; i++){
                     this.m_grad[i] += sc_x * Math.pow(this.m_data[i], sc_x-1) * t_B.m_grad[i];
@@ -215,116 +216,6 @@ public class Tensor implements Iterable<Double>{
             t_B = new Tensor(m_shape, dOut);
         }
     
-        return t_B;
-    }
-
-    /**
-     * Calculates the hyperbolic tangent (tanh) of all elements in the tensor.
-     * Unary Operation: tanh(A) = B, where A and B are tensors of the same shape and tanh is the hyperbolic tangent function.
-     * @return t_B, B in tanh(A) = B, where A is the tensor being called.
-     */
-    public Tensor tanh() {
-        double[] dOut = Arrays.stream(m_data).map(x -> Math.tanh(x)).toArray();
-    
-        Tensor t_B;
-    
-        if (m_gradEnabled) {
-            List<Tensor> children = new ArrayList<>();
-            children.add(this);
-    
-            t_B = new Tensor(m_shape, dOut, m_gradEnabled, children);
-            Backward back = () -> {
-                for(int i = 0; i < m_grad.length; i++){
-                    this.m_grad[i] += (1-(t_B.m_data[i]*t_B.m_data[i])) * t_B.m_grad[i];
-                }
-            };
-            t_B.m_backward = back;
-    
-        } else {
-            t_B = new Tensor(m_shape, dOut);
-        }
-    
-        return t_B;
-    }
-
-    /**
-     * Returns the Rectified Linear Unit (ReLU) activation of this tensor.
-     * Unary Operation: relu(A) = B, where A and B are tensors of the same shape.
-     * @return B in relu(A) = B, where relu(A) denotes the operation max(0, A) and A is the tensor being called.
-     */
-    public Tensor relu() {
-        double[] dOut = Arrays.stream(m_data).map(x -> Math.max(x, 0)).toArray();
-    
-        Tensor t_B;
-    
-        if (m_gradEnabled) {
-            List<Tensor> children = new ArrayList<>();
-            children.add(this);
-    
-            t_B = new Tensor(m_shape, dOut, m_gradEnabled, children);
-            Backward back = () -> {
-                for(int i = 0; i < m_grad.length; i++){
-                    this.m_grad[i] += ((this.m_data[i] > 0) ? 1 : 0) * t_B.m_grad[i];
-                }
-            };
-            t_B.m_backward = back;
-    
-        } else {
-            t_B = new Tensor(m_shape, dOut);
-        }
-    
-        return t_B;
-    }
-
-
-    /**
-     * Applies the softmax activation function along a specified axis.
-     * Unary operation: softmax(A) = B, where B is the same shape as A.
-     * @param axis a dimension along which Softmax will be computed (so every slice along dim will sum to 1).
-     * @return B in softmax(A), where A is the tensor being called.
-     */
-    public Tensor softmax(int axis){
-        double[] maxData = fillDataAlong(getIndicesAlong(axis), getMaxAlong(axis), axis);
-        double[] dataOut = m_data.clone();
-        for(int i = 0; i < dataOut.length; i++) dataOut[i] -= maxData[i];
-        dataOut = Arrays.stream(dataOut).map(x -> Math.exp(x)).toArray();
-        double[] expSums = fillDataAlong(getIndicesAlong(axis), getSumsAlong(axis, dataOut), axis);
-        for(int i = 0; i < dataOut.length; i++) dataOut[i] /= expSums[i];
-        
-        Tensor t_B;
-        if (m_gradEnabled) {
-            List<Tensor> children = new ArrayList<>();
-            children.add(this);
-
-            t_B = new Tensor(m_shape, dataOut, m_gradEnabled, children);
-            Backward back = () -> {
-                List<int[]> samples = getIndicesAlong(axis);
-                for(int i = 0; i < samples.size(); i++){
-                    int[] sample = samples.get(i);
-                    double[] sampleOutput = new double[m_shape[axis]];
-                    AxisIterator it_B = t_B.iterator(sample.clone(), axis);
-                    while(it_B.hasNext()) sampleOutput[it_B.iter()] = it_B.next();
-                    Tensor t_sample = new Tensor(new int[]{sampleOutput.length, 1}, sampleOutput, false);
-                    Tensor t_diag = LinAlg.diagFlat(sampleOutput);
-                    Tensor t_dot = t_sample.matmul(t_sample.T());
-                    Tensor jacobian = t_diag.sub(t_dot);
-
-                    AxisIterator it_A = this.iterator(sample.clone(), axis);
-                    while(it_A.hasNext()){
-                        it_B = t_B.iterator(sample.clone(), axis);
-                        for(int j = 0; j < jacobian.shape()[1]; j++){
-                            m_grad[storageIndex(it_A.it_pos)] += jacobian.get(new int[]{it_A.it_iter, j}) * t_B.m_grad[storageIndex(it_B.it_pos)];
-                            it_B.next();
-                        }
-                        it_A.next();
-                    }
-                }
-            };
-            t_B.m_backward = back;
-        } else {
-            t_B = new Tensor(m_shape, dataOut);
-        }
-
         return t_B;
     }
 
@@ -512,9 +403,12 @@ public class Tensor implements Iterable<Double>{
             if (this.m_shape[1] != t_B.m_shape[0]){
                 throw new IllegalArgumentException("Error: dimensions " + this.formatShape() + " and " + t_B.formatShape() + " are invalid for this operation.");            
             }
-            
+
+
+            // output shape is the first dimension of A and the second dimension of B
             int[] shapeOut = new int[] {this.m_shape[0], t_B.m_shape[1]};
     
+            // create new thread worker class to perform matrix multiplication, default threads = 4
             matMulThread mm = new matMulThread(this, t_B, shapeOut);
             double dataOut[] = mm.matMul();
     
@@ -526,7 +420,7 @@ public class Tensor implements Iterable<Double>{
                 children.add(t_B);
                 
                 t_C = new Tensor(shapeOut, dataOut, this.m_gradEnabled || t_B.m_gradEnabled, children);
-    
+                // backprop is essentially accumulation of multiplication + summation derivatives.
                 Backward back = () -> {
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
@@ -598,271 +492,10 @@ public class Tensor implements Iterable<Double>{
         else throw new UnsupportedOperationException("Error: N-d (N>2) tensor multiplication not supported yet!");
     }
 
-    // --------------------------
-    //    OTHER METHODS
-    // -------------------------
 
-    /**
-     * Remaps/reorders a integer array according to the mapping specified by axes.
-     * @param nums, the array to reorder.
-     * @param axes, a permutation of 0,1,...,N-1, where N is the length of the input array.
-     * @return the input array remapped according to the axes specification.
-     * 
-     * EX:
-     * remap([1,4,2,5], [2,0,1,3]) -> [2,1,4,5]
-     * 
-     */
-    private int[] remap(int[] nums, int[] axes){
-        if (axes.length != nums.length) throw new IllegalArgumentException("Error: axes must be between 0 and N-1.");
-        int[] remappedNums = new int[nums.length];
-
-        for(int i = 0; i < axes.length; i++){
-            if (axes[i] >= nums.length) throw new IllegalArgumentException("Error: axes must be between 0 and N-1.");
-            remappedNums[i] = nums[axes[i]];
-        }
-
-        return remappedNums;
-    }
-
-    /**
-     * Removes an index from an array.
-     * @param inArray an array of length N which to remove an index from.
-     * @param idx, the index to remove.
-     * @return an array of length N-1 with the element at index idx removed.
-     */
-    private int[] removeIdx(int[] inArray, int idx){
-        if (idx > inArray.length-1 || idx < 0) throw new IndexOutOfBoundsException("Error: axis is out of bounds for the given shape.");
-
-        int[] outArray = new int[inArray.length-1];
-        int outIdx = 0;
-        for(int i = 0; i < inArray.length && outIdx < outArray.length; i++){
-            if (i == idx) i++;
-            outArray[outIdx] = inArray[i];
-            outIdx++;
-        }
-        
-        return outArray;
-    }
-
-    /**
-     * Fills every slice along an axis with respective data;
-     * @param partitions starting points for each slice.
-     * @param fillData an array of scalars such that the ith slice is filled with the ith element in fillData.
-     * @param axis the axis which to fill along.
-     * @return a data array of the same representation with each partition slice filled with the specified data along an axis.
-     *
-     */
-    private double[] fillDataAlong(List<int[]> partitions, double[] fillData, int axis){
-        if (partitions.size() != fillData.length) throw new IllegalArgumentException("Error: number of elements in data and partition should be equal.");
-
-        double[] data = new double[m_data.length];
-        for(int i = 0; i < partitions.size(); i++){
-            AxisIterator it = new AxisIterator(partitions.get(i), axis);
-            while (it.hasNext()){
-                data[storageIndex(it.it_pos)] = fillData[i];
-                it.next();
-            }
-        }
-
-        return data;
-    }
-
-    /**
-     * Returns an array containing the sum of each slice along an axis. Used in softmax backpropagation.
-     * @param axis the axis to sum along.
-     * @param data the data to sum along. Assumed to be stored using the same representation as the calling tensor.
-     * @return an array such that the ith element contains the ith slice's sum along the specified axis in data.
-     */
-    private double[] getSumsAlong(int axis, double[] data){
-        List<int[]> indices = getIndicesAlong(axis);
-        double[] sums = new double[indices.size()];
-        for(int i = 0; i < sums.length; i++){
-            double sum = 0;
-            int[] idx = indices.get(i);
-            AxisIterator it = new AxisIterator(idx.clone(), axis);
-            it.it_data = data;
-            while(it.hasNext()) sum += it.next();
-            sums[i] = sum;
-        }
-
-        return sums;
-    }
-
-    /**
-     * Returns an array containing the maximum of each slice along an axis. Used in softmax backpropagation.
-     * @param axis the axis to compute the max along.
-     * @param data the data to max along. Assumed to be stored using the same representation as the calling tensor.
-     * @return an array such that the ith element contains the ith slice's maximum along the specified axis in data.
-     */
-    private double[] getMaxAlong(int axis){
-        List<int[]> indices = getIndicesAlong(axis);
-        double[] maxes = new double[indices.size()];
-        for(int i = 0; i < maxes.length; i++){
-            double max = Integer.MIN_VALUE;
-            int[] idx = indices.get(i);
-            AxisIterator it = new AxisIterator(idx.clone(), axis);
-            while(it.hasNext()) max = Math.max(max, it.next());
-            maxes[i] = max;
-        }
-        
-        return maxes;
-    }
-
-    /**
-     * Returns the starting points for each slice along an axis.
-     * @param axis the axis to slice across.
-     * @return a list of coordinates denoting the starting points for each slice.
-     */
-    private List<int[]> getIndicesAlong(int axis){
-        if (axis >= m_shape.length || axis < 0) throw new IllegalArgumentException("Error: axis " + axis + " out of bounds for shape " + formatShape() + ".");
-        LinkedList<int[]> indexList = new LinkedList<>();
-        insertIndicesAlong(indexList, axis, 0, new int[m_shape.length]);
-        return indexList;
-    }
-
-    /**
-     * Helper function for getIndicesAlong(int axis).
-     * @param indexList the list of coordinates to return.
-     * @param alongAxis the axis to slice along.
-     * @param idx the current dimension to iterate over.
-     * @param indices the current generated coordinates.
-     */
-    private void insertIndicesAlong(List<int[]> indexList, int alongAxis, int idx, int[] indices){
-        if (idx == m_shape.length-1){
-            if(alongAxis == idx){
-                indexList.add(indices);
-            } else{
-                for(int i=0; i< m_shape[idx]; i++){
-                    int[] tempIndex = indices.clone();
-                    tempIndex[idx] = i;
-                    indexList.add(tempIndex);
-                }
-            }
-        } else if (idx == alongAxis) {
-            insertIndicesAlong(indexList, alongAxis, idx+1, indices);
-        } else {
-            for(int i=0; i < m_shape[idx]; i++){
-                int[] tempIndex = indices.clone();
-                tempIndex[idx] = i;
-                insertIndicesAlong(indexList, alongAxis, idx+1, tempIndex);
-            }
-        }
-    }
-
-    /**
-     * NOTE: It is recommended to use the built in TensorIterator instead.
-     * Gets all indices in the tensor.
-     * @return A list of all coordinates in the tensor.
-     */
-    public List<int[]> getAllIndices(){
-        LinkedList<int[]> indexList = new LinkedList<>();
-        insertAllIndices(indexList, 0, new int[m_shape.length]);
-        return indexList;
-    }
-
-    /**
-     * Helper function for the getAllIndices() function.
-     * @param indexList the list of coordinates to return.
-     * @param idx the current dimension to iterate over.
-     * @param indices the current (incomplete) coordinate.
-     */
-    private void insertAllIndices(List<int[]> indexList, int idx, int[] indices){
-        if (idx == m_shape.length-1){
-            for(int i=0; i< m_shape[idx]; i++){
-                int[] tempIndex = indices.clone();
-                tempIndex[idx] = i;
-                indexList.add(tempIndex);
-            }
-        } else {
-            for(int i=0; i < m_shape[idx]; i++){
-                int[] tempIndex = indices.clone();
-                tempIndex[idx] = i;
-                insertAllIndices(indexList, idx+1, tempIndex);
-            }
-        }
-    }
-
-    /**
-     * Gets the index in the data array of this tensor of the element at tensor index (i, j, k, ...) depending on its data representation.
-     * @param idxs the element index in the tensor.
-     * @return the data index of this element.
-     */
-    private int storageIndex(int[] idxs){
-        return storageIndex(m_shape, idxs, dataLayout);
-    }
-
-    /**
-     * Gets the index in the data array of the element at tensor index (i, j, k, ...) depending on its data representation.
-     * @param length the number of elements in the tensor.
-     * @param shape the shape of the tensor.
-     * @param idxs the element index in the tensor.
-     * @param layout the data representation used.
-     * @return the data index of this element.
-     */
-    private int storageIndex(int[] shape, int[] idxs, DataRepresentation layout){
-        switch (layout) {
-        case ROW_MAJOR: 
-        default:
-            return LinAlg.rmo(shape, idxs);
-        }
-    }
-
-    public void backward(){
-        if (!m_gradEnabled)
-            throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
-
-        List<Tensor> ordering = new ArrayList<>();
-        buildTopo(this, new HashSet<>(), ordering);
-        Collections.reverse(ordering);
-
-        for (int i = 0; i < m_grad.length; i++){
-            m_grad[i] = 1.0;
-        }
-
-        for(Tensor val : ordering){
-            if (!val.m_gradEnabled)
-                System.out.println("Warning: some tensors encountered in backprop have gradients disabled.");
-            else
-            val.m_backward.pass();
-        }
-    }
-
-    public void backward(double[] gradient){
-        if (!m_gradEnabled)
-            throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
-        if (gradient.length != m_grad.length)
-            throw new IllegalArgumentException("Error: Shape mismatch. Gradient passed contains " + gradient.length + " elements but the tensor has " + m_grad.length + " elements.");
-
-        List<Tensor> ordering = new ArrayList<>();
-        buildTopo(this, new HashSet<>(), ordering);
-        Collections.reverse(ordering);
-
-        m_grad = gradient;
-
-        for(Tensor val : ordering){
-            if (!val.m_gradEnabled)
-                System.out.println("Warning: some tensors encountered in backprop have gradients disabled.");
-            else
-            val.m_backward.pass();
-        }
-    }
-
-    public void step(double step_size) {
-        for(int i = 0; i < m_data.length; i++)
-            m_data[i] += step_size*m_grad[i];
-    }
-
-    private void buildTopo(Tensor parent, Set<Tensor> visited, List<Tensor> ordering) {
-        if (!visited.contains(parent)) {
-            visited.add(parent);
-            if (parent.m_prev != null) {
-                for(Tensor child : parent.m_prev){
-                    buildTopo(child, visited, ordering);
-                }
-            }
-            ordering.add(parent);
-        }
-    }
+    // ---------------------
+    //       ACCESS
+    // --------------------
 
     public double[] data() {
         return m_data;
@@ -932,6 +565,167 @@ public class Tensor implements Iterable<Double>{
         return s.toString();
     }
 
+    // --------------------------
+    //    OTHER/PRIVATE METHODS
+    // -------------------------
+
+    /**
+     * Remaps/reorders a integer array according to the mapping specified by axes.
+     * @param nums, the array to reorder.
+     * @param axes, a permutation of 0,1,...,N-1, where N is the length of the input array.
+     * @return the input array remapped according to the axes specification.
+     * 
+     * EX:
+     * remap([1,4,2,5], [2,0,1,3]) -> [2,1,4,5]
+     * 
+     */
+    private int[] remap(int[] nums, int[] axes){
+        if (axes.length != nums.length) throw new IllegalArgumentException("Error: axes must be between 0 and N-1.");
+        int[] remappedNums = new int[nums.length];
+
+        for(int i = 0; i < axes.length; i++){
+            if (axes[i] >= nums.length) throw new IllegalArgumentException("Error: axes must be between 0 and N-1.");
+            remappedNums[i] = nums[axes[i]];
+        }
+
+        return remappedNums;
+    }
+
+    /**
+     * Removes an index from an array.
+     * @param inArray an array of length N which to remove an index from.
+     * @param idx, the index to remove.
+     * @return an array of length N-1 with the element at index idx removed.
+     */
+    private int[] removeIdx(int[] inArray, int idx){
+        if (idx > inArray.length-1 || idx < 0) throw new IndexOutOfBoundsException("Error: axis is out of bounds for the given shape.");
+
+        int[] outArray = new int[inArray.length-1];
+        int outIdx = 0;
+        for(int i = 0; i < inArray.length && outIdx < outArray.length; i++){
+            if (i == idx) i++;
+            outArray[outIdx] = inArray[i];
+            outIdx++;
+        }
+        
+        return outArray;
+    }
+
+    /**
+     * NOTE: It is recommended to use the built in TensorIterator instead.
+     * Gets all indices in the tensor.
+     * @return A list of all coordinates in the tensor.
+     */
+    public List<int[]> getAllIndices(){
+        LinkedList<int[]> indexList = new LinkedList<>();
+        insertAllIndices(indexList, 0, new int[m_shape.length]);
+        return indexList;
+    }
+
+    /**
+     * Helper function for the getAllIndices() function.
+     * @param indexList the list of coordinates to return.
+     * @param idx the current dimension to iterate over.
+     * @param indices the current (incomplete) coordinate.
+     */
+    private void insertAllIndices(List<int[]> indexList, int idx, int[] indices){
+        if (idx == m_shape.length-1){
+            for(int i=0; i< m_shape[idx]; i++){
+                int[] tempIndex = indices.clone();
+                tempIndex[idx] = i;
+                indexList.add(tempIndex);
+            }
+        } else {
+            for(int i=0; i < m_shape[idx]; i++){
+                int[] tempIndex = indices.clone();
+                tempIndex[idx] = i;
+                insertAllIndices(indexList, idx+1, tempIndex);
+            }
+        }
+    }
+
+    /**
+     * Gets the index in the data array of this tensor of the element at tensor index (i, j, k, ...) depending on its data representation.
+     * @param idxs the element index in the tensor.
+     * @return the data index of this element.
+     */
+    public int storageIndex(int[] idxs){
+        return storageIndex(m_shape, idxs, dataLayout);
+    }
+
+    /**
+     * Gets the index in the data array of the element at tensor index (i, j, k, ...) depending on its data representation.
+     * @param length the number of elements in the tensor.
+     * @param shape the shape of the tensor.
+     * @param idxs the element index in the tensor.
+     * @param layout the data representation used.
+     * @return the data index of this element.
+     */
+    protected int storageIndex(int[] shape, int[] idxs, DataRepresentation layout){
+        switch (layout) {
+        case ROW_MAJOR: 
+        default:
+            return LinAlg.rmo(shape, idxs);
+        }
+    }
+
+    public void backward(){
+        if (!m_gradEnabled)
+            throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
+
+        List<Tensor> ordering = new ArrayList<>();
+        buildTopo(this, new HashSet<>(), ordering);
+        Collections.reverse(ordering);
+
+        for (int i = 0; i < m_grad.length; i++){
+            m_grad[i] = 1.0;
+        }
+
+        for(Tensor val : ordering){
+            if (!val.m_gradEnabled)
+                System.out.println("Warning: some tensors encountered in backprop have gradients disabled.");
+            else
+            val.m_backward.pass();
+        }
+    }
+
+    public void backward(double[] gradient){
+        if (!m_gradEnabled)
+            throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
+        if (gradient.length != m_grad.length)
+            throw new IllegalArgumentException("Error: Shape mismatch. Gradient passed contains " + gradient.length + " elements but the tensor has " + m_grad.length + " elements.");
+
+        List<Tensor> ordering = new ArrayList<>();
+        buildTopo(this, new HashSet<>(), ordering);
+        Collections.reverse(ordering);
+
+        m_grad = gradient;
+
+        for(Tensor val : ordering){
+            if (!val.m_gradEnabled)
+                System.out.println("Warning: some tensors encountered in backprop have gradients disabled.");
+            else
+            val.m_backward.pass();
+        }
+    }
+
+    public void step(double step_size) {
+        for(int i = 0; i < m_data.length; i++)
+            m_data[i] += step_size*m_grad[i];
+    }
+
+    private void buildTopo(Tensor parent, Set<Tensor> visited, List<Tensor> ordering) {
+        if (!visited.contains(parent)) {
+            visited.add(parent);
+            if (parent.m_prev != null) {
+                for(Tensor child : parent.m_prev){
+                    buildTopo(child, visited, ordering);
+                }
+            }
+            ordering.add(parent);
+        }
+    }
+
     @Override
     public TensorIterator iterator() {
         return new TensorIterator();
@@ -941,11 +735,11 @@ public class Tensor implements Iterable<Double>{
         return new AxisIterator(start, axis);
     }
 
-    private class AxisIterator implements Iterator<Double>{
-        private int[] it_pos;
-        private double[] it_data;
-        private int it_xis;
-        private int it_iter;
+    protected class AxisIterator implements Iterator<Double>{
+        protected int[] it_pos;
+        protected double[] it_data;
+        protected int it_xis;
+        protected int it_iter;
 
         AxisIterator(int[] start, int axis){
             it_pos = start;
@@ -971,9 +765,9 @@ public class Tensor implements Iterable<Double>{
     }
 
     public class TensorIterator implements Iterator<Double>{
-        private int[] it_pos;
-        private int it_iter;
-        private int it_curAxis;
+        protected int[] it_pos;
+        protected int it_iter;
+        protected int it_curAxis;
 
         TensorIterator(){
             it_pos = new int[m_shape.length];
