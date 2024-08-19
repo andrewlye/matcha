@@ -4,11 +4,17 @@ import java.util.List;
 
 import matcha.engine.Tensor;
 
-public class ReLU extends Module{
+public class Softmax extends Module{
+
+    int m_axis;
+
+    public Softmax(int axis){
+        m_axis = axis;
+    }
 
     @Override
     public Tensor forward(Tensor x){
-        return x.relu();
+        return x.softmax(m_axis);
     }
 
     @Override
@@ -16,9 +22,9 @@ public class ReLU extends Module{
         return null;
     }
 
-
     @Override
     public String toString(){
-        return "ReLU()";
+        return "Softmax(axis=" + m_axis + ')';
     }
+    
 }

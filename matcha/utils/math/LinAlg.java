@@ -3,29 +3,71 @@ package matcha.utils.math;
 import matcha.engine.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * LinAlg - implements several useful algebraic manipulations and functions on matrices and tensors.
  * @author  andrewye
  */
 public class LinAlg {
-    /** 
-     * Returns a standard square identity matrix.
-     * @param dim the number of rows (or cols).
-     * @return An identity matrix of dimensions dim*dim.
-     */
-    public static double[][] eye(int dim) {
-        double[][] I = new double[dim][dim];
 
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                if (i == j)
-                    I[i][j] = 1.0;
-            }
+    public static Tensor eye(int n, int m){
+        return eye(new int[]{n,m}, false);
+    }
+
+    public static Tensor eye(int[] shape, boolean gradEnabled){
+        return diag(shape, 1, gradEnabled);
+    }
+
+    public static Tensor diagFlat(double[] diag){
+        return diagFlat(diag, false);
+    }
+
+    public static Tensor diagFlat(double[] diag, boolean gradEnabled){
+        return diag(new int[]{diag.length, diag.length}, diag, gradEnabled);
+    }
+
+    public static Tensor diag(int[] shape, double dVal, boolean gradEnabled){
+        double[] data = new double[sizeOf(shape)];
+        int[] diagIndex = new int[shape.length];
+        for(int i = 0; i < min(shape); i++){
+            diagIndex = fill(diagIndex, i);
+            data[rmo(data.length, shape, diagIndex)] = dVal;
         }
 
-        return I;
+        return new Tensor(shape, data, gradEnabled);
     }
+
+    public static Tensor diag(int[] shape, double[] dVal, boolean gradEnabled){
+        if (dVal.length < min(shape)) throw new IllegalArgumentException("Error: diagonal values passed must be at least equal in length to the smallest dimension.");
+
+        double[] data = new double[sizeOf(shape)];
+        int[] diagIndex = new int[shape.length];
+        for(int i = 0; i < min(shape); i++){
+            diagIndex = fill(diagIndex, i);
+            data[rmo(data.length, shape, diagIndex)] = dVal[i];
+        }
+
+        return new Tensor(shape, data, gradEnabled);
+    }
+
+
+    private static int[] fill(int[] in, int n){
+        return Arrays.stream(in).map(x -> n).toArray();
+    }
+
+    private static int min(int[] in){
+        return Arrays.stream(in).min().orElse(0);
+    }
+
+    private static int sizeOf(int[] shape){
+        int numElements = 1;
+        for (int i = 0; i < shape.length; i++)
+            numElements *= shape[i];
+        
+        return numElements;
+    }
+    
 
     /**
      * Returns the Row-Major index of an element in a list of elements, parametrized by the given shape and in-shape index.
@@ -61,24 +103,6 @@ public class LinAlg {
         }
 
         return rmo;
-    }
-    
-    /**
-     * Returns a 2-D square matrix with the elements of input as the diagonal.
-     * @param v the input elements to be diagonalized.
-     * @return diagonalized matrix of the input vector.
-     */
-    public static double[][] diagFlat(Value[] v) {
-        double[][] A = new double[v.length][v.length];
-
-        for (int i = 0; i < v.length; i++) {
-            for (int j = 0; j < v.length; j++) {
-                if (i == j)
-                    A[i][j] = v[i].data();
-            }
-        }
-
-        return A;
     }
     
     /**
