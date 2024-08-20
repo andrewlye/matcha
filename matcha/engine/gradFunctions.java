@@ -6,6 +6,7 @@ public enum GradFunctions {
     ScalarPowBackward,
     ExpBackward,
     AddBackward,
+    AddBiasBackward,
     MulBackward,
     PowBackward,
     MatrixMultiplyBackward,

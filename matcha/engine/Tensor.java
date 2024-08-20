@@ -276,6 +276,39 @@ public class Tensor implements Iterable<Double>{
         return t_C;
     }
 
+    public Tensor addBias(Tensor t_B){
+        if (m_shape.length != 2 || t_B.m_shape.length != 2) throw new IllegalCallerException("Error: this method only works if both arguments are 2D.");
+        if (t_B.m_shape[0] != 1 && t_B.m_shape[1] != m_shape[1]) throw new IllegalArgumentException("Error: first dimension of input shape must be 1 and second dimensions must match.");
+
+        double dOut[] = new double[m_data.length];
+        for(int i = 0; i < m_shape[0]; i++){
+            for(int j = 0; j < m_shape[1]; j++){
+                dOut[i*m_shape[0] + j] = m_data[i*m_shape[0] + j] + t_B.m_data[j];
+            }
+        }
+
+        Tensor t_C;
+
+        if (m_gradEnabled || t_B.m_gradEnabled){
+            List<Tensor> children = new ArrayList<>();
+            children.add(this);
+            children.add(t_B);
+            t_C = new Tensor(this.m_shape, dOut, this.m_gradEnabled || t_B.m_gradEnabled, children);
+            Backward back = () -> {
+                for(int i = 0; i < m_grad.length; i++){
+                    if (this.m_gradEnabled) this.m_grad[i] += 1.0 * t_C.m_grad[i];
+                    if (t_B.m_gradEnabled) t_B.m_grad[i % t_B.m_shape[1]] += 1.0 * t_C.m_grad[i];
+                }
+            };
+            t_C.m_backward = back;
+            t_B.m_gradFn = GradFunctions.AddBiasBackward;
+        } else {
+            t_C = new Tensor(this.m_shape, dOut);
+        }
+
+        return t_C;
+    }
+
     /**
      * Subtracts two tensors together element wise.
      * Binary operation: A - B = C, where A, B, C are tensors of the same shape.
@@ -424,8 +457,10 @@ public class Tensor implements Iterable<Double>{
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
-                                t_B.m_grad[storageIndex(t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                if (m_gradEnabled)
+                                    this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                if (t_B.m_gradEnabled)
+                                    t_B.m_grad[storageIndex(t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
@@ -474,8 +509,10 @@ public class Tensor implements Iterable<Double>{
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
-                                t_B.m_grad[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                if (m_gradEnabled)
+                                    this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                if (t_B.m_gradEnabled) 
+                                    t_B.m_grad[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
@@ -733,7 +770,7 @@ public class Tensor implements Iterable<Double>{
      */
     public void backward(){
         double[] gradient = new double[m_grad.length];
-        for (int i = 0; i < m_grad.length; i++) m_grad[i] = 1.0;
+        for (int i = 0; i < m_grad.length; i++) gradient[i] = 1.0;
 
         backward(gradient);
     }
@@ -747,18 +784,16 @@ public class Tensor implements Iterable<Double>{
             throw new IllegalCallerException("Error: calling backprop on non grad-enabled Tensor.");
         if (gradient.length != m_grad.length)
             throw new IllegalArgumentException("Error: Shape mismatch. Gradient passed contains " + gradient.length + " elements but the tensor has " + m_grad.length + " elements.");
+        
+        m_grad = gradient; // set gradients
 
         List<Tensor> ordering = new ArrayList<>();
         buildTopo(this, new HashSet<>(), ordering);
         Collections.reverse(ordering);
 
-        m_grad = gradient;
-
         for(Tensor val : ordering){
-            if (!val.m_gradEnabled)
-                System.out.println("Warning: some tensors encountered in this backpropagation run have gradients disabled.");
-            else
-            val.m_backward.pass();
+            if (val.m_gradEnabled)
+                val.m_backward.pass();
         }
     }
 

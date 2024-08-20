@@ -1,19 +1,20 @@
 package matcha.engine.threads;
 
+import java.util.Arrays;
+import java.util.concurrent.atomic.DoubleAdder;
+
 import matcha.engine.DataRepresentation;
 import matcha.engine.Tensor;
 import matcha.utils.math.LinAlg;
 
 public class matMulThread {
-    static int MAX_THREADS = 4;
-    double[] data;
+    static int MAX_THREADS = 8;
+    DoubleAdder[] syncData;
     int[] shape;
     Tensor t_a;
     Tensor t_b;
     int step;
     char part;
-    private DataRepresentation m_dataLayoutA;
-    private DataRepresentation m_dataLayoutB;
 
     class Worker extends Thread {
         int i;
@@ -37,13 +38,16 @@ public class matMulThread {
                 kStart = i * step;
                 kEnd = Math.min(i * step + step, t_b.shape()[0]);
             }
+
+            //System.out.println("Worker " + i + " rStart: " + rStart + " rEnd: " + rEnd + " cStart: " + cStart + " cEnd: " + cEnd + " kStart: " + kStart + " kEnd: " + kEnd);
         }
 
         public void run(){
             for(int r = rStart; r < rEnd; r++){
                 for(int c = cStart; c < cEnd; c++){
                     for(int k = kStart; k < kEnd; k++){
-                        data[storageIndex(shape, new int[]{r, c}, m_dataLayoutA)] += t_a.data()[storageIndex(t_a.shape(), new int[]{r, k}, m_dataLayoutA)] * t_b.data()[storageIndex(t_b.shape(), new int[]{k, c}, m_dataLayoutB)];
+                        double x_i = t_a.data()[storageIndex(t_a.shape(), new int[]{r, k}, t_a.dataLayout)] * t_b.data()[storageIndex(t_b.shape(), new int[]{k, c}, t_b.dataLayout)];
+                        syncData[storageIndex(shape, new int[]{r, c}, t_a.dataLayout)].add(x_i);
                     }
                 }
             }
@@ -59,12 +63,12 @@ public class matMulThread {
     }
 
     public matMulThread(Tensor t_a, Tensor t_b, int[] shape){
-        data = new double[t_a.shape()[0] * t_b.shape()[1]];
+        syncData = new DoubleAdder[t_a.shape()[0] * t_b.shape()[1]];
+        for(int i = 0; i < syncData.length; i++) syncData[i] = new DoubleAdder();
+
         this.shape = shape;
         this.t_a = t_a;
         this.t_b = t_b;
-        this.m_dataLayoutA = t_a.dataLayout;
-        this.m_dataLayoutB = t_b.dataLayout;
         
         // thread along the largest dimension for largest increase in efficiency.
         if (t_a.shape()[0] >= t_b.shape()[1] && t_a.shape()[0] >= t_b.shape()[0]){
@@ -96,7 +100,6 @@ public class matMulThread {
                 e.printStackTrace();
             }
         }
-
-        return data;
+        return Arrays.stream(syncData).mapToDouble(x -> x.sum()).toArray();
     }
 }

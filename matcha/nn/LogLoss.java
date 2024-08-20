@@ -9,4 +9,8 @@ public class LogLoss extends Loss {
     Tensor loss(Tensor input, Tensor target) {
         return FN_Loss.log_loss(input, target);
     }
+
+    Tensor loss(Tensor input, Tensor target, String reduction) {
+        return FN_Loss.log_loss(input, target, reduction);
+    }
 }
