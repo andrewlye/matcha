@@ -19,7 +19,7 @@ Here is a runtime comparison of a single forward pass of an input vector through
 | --- | --- | --- | --- | --- |
 | `matcha.engine.Value` | 3.64998s | OOM | OOM | OOM |
 | `matcha.engine.Tensor` | 0.22332s| 0.44060s | 0.88061s | 10.54275s |
-| Tensor (multithreaded) | 0.15539s| 0.29720s | 0.59268s |  6.60610s |
+| Tensor (multithreaded) | 0.15539s| 0.20414s | 0.37536s |  6.60610s |
 
 Multithreading provides ~33% faster operations
 
