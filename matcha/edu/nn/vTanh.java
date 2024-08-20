@@ -1,19 +1,19 @@
-package matcha.legacy.nn;
+package matcha.edu.nn;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import matcha.engine.Value;
 
-public class vTanh extends vModule<Value[]>{
-    public vTanh(){
+public class vTanh extends vModule<Value[]> {
+    public vTanh() {
 
     }
 
     @Override
     public Value[] forward(Value[] x) throws Exception {
         Value[] out = new Value[x.length];
-        for(int i = 0; i < x.length; i++){
+        for (int i = 0; i < x.length; i++) {
             out[i] = x[i].tanh();
         }
 
@@ -26,7 +26,7 @@ public class vTanh extends vModule<Value[]>{
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Tanh()";
     }
 }

@@ -1,4 +1,4 @@
-package matcha.legacy.nn;
+package matcha.edu.nn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,29 +9,29 @@ import matcha.engine.Value;
 /**
  * A multi-layer perceptron (MLP) module.
  */
-public class vMLP extends vModule<Value[]>{
+public class vMLP extends vModule<Value[]> {
     private List<vModule<Value[]>> layers;
 
     /**
-     * @param in_channels Number of channels of the input
+     * @param in_channels     Number of channels of the input
      * @param hidden_channels List of hidden channel dimensions
-     * @param activations List of inter-layer activations
+     * @param activations     List of inter-layer activations
      * @throws Exception
      */
-    public vMLP(int in_channels, List<Integer> hidden_channels, List<String> activations) throws Exception{
+    public vMLP(int in_channels, List<Integer> hidden_channels, List<String> activations) throws Exception {
         List<Integer> sizes = new ArrayList<>(hidden_channels);
         sizes.add(0, in_channels);
 
-        if (activations.size() != sizes.size()-1){
+        if (activations.size() != sizes.size() - 1) {
             throw new Exception("Warning: activations must be the same in length as the number of layers!");
         }
 
-        layers = new ArrayList<>(sizes.size()-1);
-        for(int i = 0; i < sizes.size() - 1; i++){
-            layers.add(new vLinear(sizes.get(i), sizes.get(i+1)));
-            if (activations.get(i).toLowerCase().equals("tanh")){
+        layers = new ArrayList<>(sizes.size() - 1);
+        for (int i = 0; i < sizes.size() - 1; i++) {
+            layers.add(new vLinear(sizes.get(i), sizes.get(i + 1)));
+            if (activations.get(i).toLowerCase().equals("tanh")) {
                 layers.add(new vTanh());
-            } else if (activations.get(i).toLowerCase().equals("relu")){
+            } else if (activations.get(i).toLowerCase().equals("relu")) {
                 layers.add(new vReLU());
             }
         }
@@ -41,10 +41,10 @@ public class vMLP extends vModule<Value[]>{
     }
 
     @Override
-    public Value[] forward(Value[] x) throws Exception{
+    public Value[] forward(Value[] x) throws Exception {
         Value[] prev = x;
         Value[] next = null;
-        for(vModule<Value[]> layer : layers){
+        for (vModule<Value[]> layer : layers) {
             next = layer.forward(prev);
             prev = next;
         }
@@ -53,10 +53,10 @@ public class vMLP extends vModule<Value[]>{
     }
 
     @Override
-    public List<Value> parameters(){
+    public List<Value> parameters() {
         List<Value> params = new ArrayList<>();
-        for(vModule<Value[]> layer : layers){
-            for(Value param : layer.parameters()){
+        for (vModule<Value[]> layer : layers) {
+            for (Value param : layer.parameters()) {
                 params.add(param);
             }
         }
@@ -67,10 +67,10 @@ public class vMLP extends vModule<Value[]>{
     /**
      * @return All neurons in the network's non-activation layers
      */
-    public List<List<vNeuron>> getNeurons(){
+    public List<List<vNeuron>> getNeurons() {
         List<List<vNeuron>> out = new ArrayList<>(layers.size());
-        for(vModule<Value[]> layer : layers){
-            if(layer instanceof vLinear)
+        for (vModule<Value[]> layer : layers) {
+            if (layer instanceof vLinear)
                 out.add(((vLinear) layer).getNeurons());
         }
 
@@ -81,23 +81,23 @@ public class vMLP extends vModule<Value[]>{
      * @param layer, the layer to retrieve neurons from
      * @return All neurons in the specified layer of the network, if applicable
      */
-    public List<vNeuron> getNeurons(int layer){
-        if (layers.get(layer) instanceof vLinear){
+    public List<vNeuron> getNeurons(int layer) {
+        if (layers.get(layer) instanceof vLinear) {
             return ((vLinear) layers.get(layer)).getNeurons();
-        }
-        else return null;
+        } else
+            return null;
     }
 
     /**
      * @return All network layers
      */
-    public List<vModule<Value[]>> getLayers(){
+    public List<vModule<Value[]>> getLayers() {
         return layers;
-     }
+    }
 
-    public String toString(){
+    public String toString() {
         String model_desc = "MLP(\n";
-        for(vModule<Value[]> layer : layers){
+        for (vModule<Value[]> layer : layers) {
             model_desc += "   " + layer.toString() + "\n";
         }
         model_desc += ")";

@@ -1,16 +1,16 @@
-package matcha.legacy.nn;
+package matcha.edu.nn;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import matcha.engine.Value;
 
-public class vReLU extends vModule<Value[]>{
+public class vReLU extends vModule<Value[]> {
 
     @Override
     Value[] forward(Value[] x) throws Exception {
         Value[] out = new Value[x.length];
-        for(int i = 0; i < x.length; i++){
+        for (int i = 0; i < x.length; i++) {
             out[i] = x[i].relu();
         }
 
@@ -23,8 +23,8 @@ public class vReLU extends vModule<Value[]>{
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "ReLU()";
     }
-    
+
 }
