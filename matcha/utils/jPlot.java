@@ -103,7 +103,7 @@ public class jPlot {
     public void show(){
         frame.add(new PlotComponentAggregator(m_components));
         frame.setVisible(true);  
-        frame.setResizable(false);
+        //frame.setResizable(false);
     }
 
     /**
