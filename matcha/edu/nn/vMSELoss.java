@@ -1,6 +1,6 @@
 package matcha.edu.nn;
 
-import matcha.engine.Value;
+import matcha.edu.engine.Value;
 
 public class vMSELoss extends vLoss<Value> {
     public vMSELoss() {

@@ -2,7 +2,8 @@ package matcha.edu.nn;
 
 import java.util.Arrays;
 import java.util.List;
-import matcha.engine.Value;
+
+import matcha.edu.engine.Value;
 
 /**
  * Abstract class for a network module, where T is the type returned.

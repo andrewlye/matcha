@@ -1,10 +1,11 @@
 package matcha.edu.nn;
 
-import matcha.engine.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import matcha.edu.engine.Value;
 
 /**
  * A single neuron, takes an input of the same dimension as its number of

@@ -1,7 +1,8 @@
-package matcha.optim;
+package matcha.edu.optim;
 
-import matcha.engine.Value;
 import java.util.List;
+
+import matcha.edu.engine.Value;
 
 public class SGD extends Optimization{
     private List<Value> params;

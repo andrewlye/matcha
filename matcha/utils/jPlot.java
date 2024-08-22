@@ -60,7 +60,8 @@ public class jPlot {
      * @param configs dict of configs to provide 
      * param -> type : default
      * [
-     * "color" -> java.awt.Color : BLACK. Line color
+     * "color" -> java.awt.Color : BLACK. Line color.
+     * "stroke" -> float : DefaultPlotConfig.LINE_STROKE. Line width.
      * ].
      */
     public void plot(double[] xs, double[] ys, Map<String, Object> configs){

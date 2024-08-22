@@ -3,7 +3,7 @@ package matcha.edu.nn;
 import java.util.ArrayList;
 import java.util.List;
 
-import matcha.engine.Value;
+import matcha.edu.engine.Value;
 
 public class vTanh extends vModule<Value[]> {
     public vTanh() {

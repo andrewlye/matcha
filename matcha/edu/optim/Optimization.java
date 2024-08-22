@@ -1,7 +1,8 @@
-package matcha.optim;
+package matcha.edu.optim;
 
 import java.util.List;
-import matcha.engine.Value;
+
+import matcha.edu.engine.Value;
 
 public abstract class Optimization {
     private List<Value> params;

@@ -6,9 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.awt.BasicStroke;
 import java.awt.Color;
 
+import matcha.utils.DefaultPlotConfig;
 import matcha.utils.jPlot;
 
 public class LinePlot extends PlotComponent{
@@ -36,15 +37,17 @@ public class LinePlot extends PlotComponent{
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor((Color) m_config.get("color"));
-        for(int i = 0; i < m_x.length-1; i++){
-            g2d.drawLine(m_plt.xToPX(m_x[i]), m_plt.yToPX(m_y[i]), m_plt.xToPX(m_x[i+1]), m_plt.yToPX(m_y[i+1]));
-        }
+        g2d.setStroke(new BasicStroke((float) m_config.get("stroke")));
+
+
+        for(int i = 0; i < m_x.length-1; i++) g2d.drawLine(m_plt.xToPX(m_x[i]), m_plt.yToPX(m_y[i]), m_plt.xToPX(m_x[i+1]), m_plt.yToPX(m_y[i+1]));
     }
 
     @Override
     public Map<String, Object> init(){
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("color", Color.BLACK);
+        config.put("stroke", DefaultPlotConfig.LINE_STROKE);
         
         return config;
     }

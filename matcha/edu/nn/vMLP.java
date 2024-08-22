@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import matcha.engine.Value;
+import matcha.edu.engine.Value;
 
 /**
  * A multi-layer perceptron (MLP) module.

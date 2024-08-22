@@ -2,7 +2,7 @@ package matcha.edu.nn;
 
 import java.util.Arrays;
 
-import matcha.engine.Value;
+import matcha.edu.engine.Value;
 
 public abstract class vLoss<T> {
     abstract T loss(Value[] outputs, Value[] targets);
