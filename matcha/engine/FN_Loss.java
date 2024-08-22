@@ -37,7 +37,7 @@ public final class FN_Loss {
         if (target.m_shape[0] != input.m_shape[0]) 
             throw new IllegalArgumentException("Error: expected target batch size (" + target.m_shape[0] + ") to match input batch size (" + input.m_shape[0] + ")."); 
 
-        switch (reduction.toLowerCase()){
+        switch (reduction){
         case "none":
             return log_loss_none(input, target);
         case "sum":  // calculate summed minus log of target predictions
@@ -183,8 +183,47 @@ public final class FN_Loss {
         }
     }
 
-    public Tensor mse_loss(Tensor input, Tensor target){
-        throw new UnsupportedOperationException();
+    public static Tensor mse_loss(Tensor input, Tensor target) { return mse_loss(input, target, "mean"); }
+
+    public static Tensor mse_loss(Tensor input, Tensor target, String reduction){
+        if (!(reduction.equals("mean") || reduction.equals("sum"))) 
+            throw new IllegalArgumentException("Error: please specify a valid reduction ['mean', 'sum'].");
+
+        if (!Arrays.equals(input.m_shape, target.m_shape)) 
+            throw new IllegalArgumentException("Error: input and target tensors must be of the same shape.");
+        
+        double mse = 0.0;
+        for(int i = 0; i < target.m_data.length; i++) mse += ( target.m_data[i] - input.m_data[i] ) * ( target.m_data[i] - input.m_data[i] );
+
+        mse = (reduction.equals("mean")) ? mse / input.size() : mse;
+
+        Tensor t_C = new Tensor(new int[]{1}, new double[]{mse}, input.m_gradEnabled || target.m_gradEnabled);
+
+        if (input.m_gradEnabled || target.m_gradEnabled){
+            
+            Backward back;
+            if (reduction.equals("mean")){
+                back = () -> {
+                    for(int i = 0; i < input.m_data.length; i++){
+                        if (input.m_gradEnabled) input.m_grad[i] += -2.0*(target.m_data[i] - input.m_data[i]) / input.size();
+                        if (target.m_gradEnabled) target.m_grad[i] += 2.0*(target.m_data[i] - input.m_data[i]) / input.size();
+                    }
+                };
+            } else {
+                back = () -> {
+                    for(int i = 0; i < input.m_grad.length; i++){
+                        if (input.m_gradEnabled) input.m_grad[i] += -2.0*(target.m_data[i] - input.m_data[i]);
+                        if (target.m_gradEnabled) target.m_grad[i] += 2.0*(target.m_data[i] - input.m_data[i]);
+                    }
+                };
+            }
+
+            t_C.m_backward = back;
+            t_C.m_gradFn = GradFunctions.MSELossBackward;
+            return t_C;
+        } else {
+            return t_C;
+        }
     }
 
     public Tensor cross_entropy(Tensor input, Tensor target){

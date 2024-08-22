@@ -80,11 +80,6 @@ public class Tensor implements Iterable<Double>{
     //    UNARY OPERATIONS
     // -------------------------
 
-    // public Tensor T(int[] axes){
-    //     double[] dOut = new double[m_data.length];
-
-    // }
-
     /**
      * Transposes a N-dimensional tensor using a list of axes for the dimension mapping.
      * @param axes a permutation (0, 1, 2, ..., N-1) of the shape indices for the transposed tensor.
@@ -261,7 +256,7 @@ public class Tensor implements Iterable<Double>{
 
             t_C = new Tensor(this.m_shape, dOut, this.m_gradEnabled || t_B.m_gradEnabled, children);
             Backward back = () -> {
-                for(int i = 0; i < m_grad.length; i++){
+                for(int i = 0; i < m_data.length; i++){
                     if (this.m_gradEnabled) this.m_grad[i] += 1.0 * t_C.m_grad[i];
                     if (t_B.m_gradEnabled) t_B.m_grad[i] += 1.0 * t_C.m_grad[i];
                 }
@@ -295,7 +290,7 @@ public class Tensor implements Iterable<Double>{
             children.add(t_B);
             t_C = new Tensor(this.m_shape, dOut, this.m_gradEnabled || t_B.m_gradEnabled, children);
             Backward back = () -> {
-                for(int i = 0; i < m_grad.length; i++){
+                for(int i = 0; i < m_data.length; i++){
                     if (this.m_gradEnabled) this.m_grad[i] += 1.0 * t_C.m_grad[i];
                     if (t_B.m_gradEnabled) t_B.m_grad[i % t_B.m_shape[1]] += 1.0 * t_C.m_grad[i];
                 }
@@ -344,7 +339,7 @@ public class Tensor implements Iterable<Double>{
             children.add(t_B);  
             t_C = new Tensor(m_shape, dOut, m_gradEnabled || t_B.m_gradEnabled, children);
             Backward back = () -> {
-                for(int i = 0; i < m_grad.length; i++){
+                for(int i = 0; i < m_data.length; i++){
                     if (this.m_gradEnabled) this.m_grad[i] += t_B.m_data[i] * t_C.m_grad[i];
                     if (t_B.m_gradEnabled) t_B.m_grad[i] += this.m_data[i] * t_C.m_grad[i];
                 }
@@ -392,11 +387,11 @@ public class Tensor implements Iterable<Double>{
             children.add(this);
             children.add(t_B);
     
-            t_C = new Tensor(m_shape, dOut, m_gradEnabled, children);
+            t_C = new Tensor(m_shape, dOut, m_gradEnabled || t_B.m_gradEnabled, children);
             Backward back = () -> {
-                for(int i = 0; i < m_grad.length; i++){
-                    this.m_grad[i] += t_B.m_data[i] * Math.pow(this.m_data[i], t_B.m_data[i]-1) * t_C.m_grad[i];
-                    t_B.m_grad[i] += Math.pow(this.m_data[i], t_B.m_data[i]) * Math.log(t_B.m_data[i]) * t_C.m_grad[i];
+                for(int i = 0; i < m_data.length; i++){
+                    if(m_gradEnabled) this.m_grad[i] += t_B.m_data[i] * Math.pow(this.m_data[i], t_B.m_data[i]-1) * t_C.m_grad[i];
+                    if(t_B.m_gradEnabled) t_B.m_grad[i] += Math.pow(this.m_data[i], t_B.m_data[i]) * Math.log(t_B.m_data[i]) * t_C.m_grad[i];
                 }
             };
             t_C.m_backward = back;

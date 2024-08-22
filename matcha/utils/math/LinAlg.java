@@ -97,6 +97,21 @@ public class LinAlg {
 
         return rmo;
     }
+
+    public static double[] arange(double start, double end, double step){
+        if (step == 0) throw new IllegalArgumentException("Error: step cannot be 0.");
+        if (end < start && step > 0) throw new IllegalArgumentException("Error: step cannot be > 0 if end < start.");
+        if (step < 0){
+            double tmp = start;
+            start = end;
+            end = tmp;
+            step *= -1;
+        }
+        double[] ranges = new double[(int) ((end - start) / step) + 1];
+        for(int i = 0; i < ranges.length; i ++) ranges[i] = start + i*step;
+
+        return ranges;
+    }
     
     /**
      * Returns the dimensions of an array (or nested array) of objects.

@@ -17,4 +17,5 @@ public enum GradFunctions {
     MeanLogLossBackward,
     SumLogLossBackward,
     LogLossBackward,
+    MSELossBackward,
 }
