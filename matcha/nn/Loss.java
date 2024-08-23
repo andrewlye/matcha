@@ -2,7 +2,7 @@ package matcha.nn;
 
 import matcha.engine.Tensor;
 
-public abstract class Loss {
+public interface Loss {
     
-    abstract Tensor loss(Tensor input, Tensor target);
+    public Tensor loss(Tensor input, Tensor target);
 }

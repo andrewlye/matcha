@@ -6,10 +6,13 @@ import java.util.Queue;
 
 import javax.swing.JComponent;
 
+/**
+ * Final JComponent added to the JFrame. Paints all PlotComponent layers.
+ */
 public class PlotComponentAggregator extends JComponent{
-    Queue<JComponent> m_layers;
+    Queue<PlotComponent> m_layers;
 
-    public PlotComponentAggregator(Queue<JComponent> layers){
+    public PlotComponentAggregator(Queue<PlotComponent> layers){
         m_layers = layers;
     }
 

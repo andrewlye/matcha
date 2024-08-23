@@ -5,7 +5,7 @@ import java.util.List;
 import matcha.engine.Tensor;
 import matcha.engine.FN_Activations;;
 
-public class Softmax extends Module{
+public class Softmax implements Module{
 
     int m_axis;
 

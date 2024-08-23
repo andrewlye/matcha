@@ -5,10 +5,10 @@ import java.util.List;
 import matcha.engine.Tensor;
 import matcha.engine.FN_Activations;;
 
-public class Tanh extends Module{
+public class Tanh implements Module{
 
     @Override
-    Tensor forward(Tensor x){
+    public Tensor forward(Tensor x){
         return FN_Activations.tanh(x);
     }
 

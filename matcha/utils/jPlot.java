@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import matcha.engine.Tensor;
 import matcha.utils.DefaultPlotConfig;
 import matcha.utils.jPlotComponent.*;
 
@@ -16,7 +17,7 @@ import matcha.utils.jPlotComponent.*;
  */
 public class jPlot {
     private JFrame frame;
-    private Queue<JComponent> m_components; // figure layers are stored as a FIFO ordering of components
+    private Queue<PlotComponent> m_components; // figure layers are stored as a FIFO ordering of components
 
 
     private int m_width; // window width
@@ -39,9 +40,9 @@ public class jPlot {
     private int m_yTicks = DefaultPlotConfig.Y_TICKS;
 
     // default window initialization
-    public jPlot(){ this(DefaultPlotConfig.WIDTH, DefaultPlotConfig.HEIGHT); }
-
-    public jPlot(int width, int height){
+    public jPlot(){ this(DefaultPlotConfig.WIDTH, DefaultPlotConfig.HEIGHT, new HashMap<>()); }
+    public jPlot(int width, int height) { this(width, height, new HashMap<>()); }
+    public jPlot(int width, int height, Map<String, ?> axisConfig){
         m_width = width;
         m_height = height;
         frame = new JFrame();
@@ -50,7 +51,7 @@ public class jPlot {
         m_components = new LinkedList<>();
         init();
         // we always add an axis as the first component to our figure
-        m_components.add(new Axis(this, DefaultPlotConfig.XLABEL_OFFSET, DefaultPlotConfig.YLABEL_OFFSET, DefaultPlotConfig.TICK_SIZE));
+        m_components.add(new Axis(this, axisConfig));
     }
 
     /**
@@ -60,18 +61,31 @@ public class jPlot {
      * @param configs dict of configs to provide 
      * param -> type : default
      * [
-     * "color" -> java.awt.Color : BLACK. Line color.
+     * "color" -> String : #000000. Line color.
      * "stroke" -> float : DefaultPlotConfig.LINE_STROKE. Line width.
      * ].
      */
-    public void plot(double[] xs, double[] ys, Map<String, Object> configs){
+    public void plot(double[] xs, double[] ys, Map<String, ?> configs){
         if (xs.length != ys.length) throw new IllegalArgumentException("Error: x and y arrays should be the same length.");
         resize(xs, ys);
         m_components.add(new LinePlot(this, xs, ys, configs));
     }
 
     // default plot
-    public void plot(double[] xs, double[] ys) { plot(xs, ys, new HashMap<String, Object>()); }
+    public void plot(double[] xs, double[] ys) { plot(xs, ys, new HashMap<>()); }
+
+    public void plot(Tensor xs, Tensor ys, Map<String, ?> configs){
+        if (xs.shape().length > 2 || ys.shape().length > 2) 
+            throw new IllegalArgumentException("Error: input tensors must be shape (n,), (1,n) or (n,1).");
+        if (xs.shape().length == 2){
+            if (xs.shape()[0] != 1 && xs.shape()[1] != 1 || ys.shape()[0] != 1 && ys.shape()[1] != 1) 
+                throw new IllegalArgumentException("Error: input tensors must be shape (n,), (1,n) or (n,1).");
+        }
+        
+        plot(xs.data(),  ys.data(), configs);
+    }
+
+    public void plot(Tensor xs, Tensor ys) { plot(xs, ys, new HashMap<>()); }
 
     /**
      * Plots y versus x as dots/markers.
@@ -81,13 +95,13 @@ public class jPlot {
      * param -> type : default
      * [
      *  "fill" -> boolean : true. If true fills in markers with fill_color.
-     *  "fill_color" -> java.awt.Color : DefaultPlotConfig.MARKER_FILL. Fill color.
+     *  "fill_color" -> String : DefaultPlotConfig.MARKER_FILL. Fill color.
      *  "outline" -> boolean : true. If true, draws outline around markers.
-     *  "outline_color" -> java.awt.Color : BLACK. Outline color.
+     *  "outline_color" -> String : #000000. Outline color.
      *  "marker_size" -> int : DefaultPlotConfig.MARKER_SIZE. Size of markers to draw.
      * ]
      */
-    public void scatter(double[] xs, double[] ys, Map<String, Object> configs){
+    public void scatter(double[] xs, double[] ys, Map<String, ?> configs){
         if (xs.length != ys.length) throw new IllegalArgumentException("Error: x and y arrays should be the same length.");
         resize(xs, ys);
         
@@ -96,6 +110,19 @@ public class jPlot {
 
     // default scatter
     public void scatter(double[] xs, double[] ys) { scatter(xs, ys, new HashMap<String, Object>()); }
+
+    public void scatter(Tensor xs, Tensor ys, Map<String, ?> configs){
+        if (xs.shape().length > 2 || ys.shape().length > 2) 
+            throw new IllegalArgumentException("Error: input tensors must be shape (n,), (1,n) or (n,1).");
+        if (xs.shape().length == 2){
+            if (xs.shape()[0] != 1 && xs.shape()[1] != 1 || ys.shape()[0] != 1 && ys.shape()[1] != 1) 
+                throw new IllegalArgumentException("Error: input tensors must be shape (n,), (1,n) or (n,1).");
+        }
+        
+        scatter(xs.data(),  ys.data(), configs);
+    }
+
+    public void scatter(Tensor xs, Tensor ys) { scatter(xs, ys, new HashMap<>()); }
 
     /**
      * Constructs and shows the plot/figure.

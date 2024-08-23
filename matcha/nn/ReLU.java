@@ -5,7 +5,7 @@ import java.util.List;
 import matcha.engine.Tensor;
 import matcha.engine.FN_Activations;
 
-public class ReLU extends Module{
+public class ReLU implements Module{
 
     @Override
     public Tensor forward(Tensor x){

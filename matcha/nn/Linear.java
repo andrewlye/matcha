@@ -6,7 +6,7 @@ import java.util.List;
 import matcha.engine.Tensor;
 import matcha.nn.Initializer;
 
-public class Linear extends Module{
+public class Linear implements Module{
 
     private Tensor m_weights;
     private Tensor m_bias;

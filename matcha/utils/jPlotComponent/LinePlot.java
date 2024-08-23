@@ -17,7 +17,7 @@ public class LinePlot extends PlotComponent{
     private double[] m_x;
     private double[] m_y;
 
-    public LinePlot(jPlot plt, double[] xs, double ys[], Map<String, Object> config){
+    public LinePlot(jPlot plt, double[] xs, double ys[], Map<String, ?> config){
         init();
         m_plt = plt;
         ArrayList<double[]> xyPairs = new ArrayList<>();
@@ -36,7 +36,7 @@ public class LinePlot extends PlotComponent{
     private void scatter(Graphics g){
         Graphics2D g2d = (Graphics2D) g;
 
-        g2d.setColor((Color) m_config.get("color"));
+        g2d.setColor(java.awt.Color.decode((String) m_config.get("color")));
         g2d.setStroke(new BasicStroke((float) m_config.get("stroke")));
 
 
@@ -46,7 +46,7 @@ public class LinePlot extends PlotComponent{
     @Override
     public Map<String, Object> init(){
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("color", Color.BLACK);
+        config.put("color", "#000000");
         config.put("stroke", DefaultPlotConfig.LINE_STROKE);
         
         return config;

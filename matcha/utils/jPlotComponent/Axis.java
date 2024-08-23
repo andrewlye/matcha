@@ -3,24 +3,25 @@ package matcha.utils.jPlotComponent;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.swing.JComponent;
 import java.awt.FontMetrics;
 
+import matcha.utils.DefaultPlotConfig;
 import matcha.utils.jPlot;
 import matcha.utils.math.LinAlg;
 
-public class Axis extends JComponent{
+/**
+ * Axis component for jPlot figures. Draws x and y axis, ticks, and labels.
+ */
+public class Axis extends PlotComponent{
     private jPlot m_plt;
-    private int m_xLabelOffset;
-    private int m_yLabelOffset;
-    private int m_tickSize;
 
-    public Axis(jPlot plt, int xLabelOffset, int yLabelOffset, int tickSize){
+    public Axis(jPlot plt, Map<String, ?> config){
         m_plt = plt;
-        m_xLabelOffset = xLabelOffset;
-        m_yLabelOffset = yLabelOffset;
-        m_tickSize = tickSize;
+        updateConfig(config);
     }
 
     public void drawAxis(Graphics g){
@@ -45,23 +46,34 @@ public class Axis extends JComponent{
 
         int[] xTicks = Arrays.stream(LinAlg.arange(m_plt.xStartPX(), m_plt.xEndPX(), (m_plt.xEndPX() - m_plt.xStartPX()) / m_plt.xTicks())).mapToInt(x -> (int) x).toArray();
         for(int i = 0; i < xTicks.length; i++){
-            g2d.drawLine(xTicks[i], m_plt.yEndPX() - yShift + m_tickSize, xTicks[i], m_plt.yEndPX() - yShift - m_tickSize);
+            g2d.drawLine(xTicks[i], m_plt.yEndPX() - yShift + (int) m_config.get("tick_size"), xTicks[i], m_plt.yEndPX() - yShift - (int) m_config.get("tick_size"));
             double currentX = m_plt.xStart() + (m_plt.xEnd() - m_plt.xStart()) * i / m_plt.xTicks();
             String str_currentX = String.format("%.2f", currentX);
-            g2d.drawString(str_currentX, xTicks[i] - fm.stringWidth(str_currentX) / 2, m_plt.yEndPX() - yShift + m_xLabelOffset);
+            g2d.drawString(str_currentX, xTicks[i] - fm.stringWidth(str_currentX) / 2, m_plt.yEndPX() - yShift + (int) m_config.get("xlabel_offset"));
         }
         
         int[] yTicks = Arrays.stream(LinAlg.arange(m_plt.yStartPX(), m_plt.yEndPX(), (m_plt.yEndPX() - m_plt.yStartPX()) / m_plt.yTicks())).mapToInt(x -> (int) x).toArray();
         for(int i = 0; i < yTicks.length; i++){
-            g2d.drawLine(m_plt.xStartPX() + xShift + m_tickSize, yTicks[i], m_plt.xStartPX() + xShift - m_tickSize, yTicks[i]);
+            g2d.drawLine(m_plt.xStartPX() + xShift + (int) m_config.get("tick_size"), yTicks[i], m_plt.xStartPX() + xShift - (int) m_config.get("tick_size"), yTicks[i]);
             double currentY = m_plt.yStart() + (m_plt.yEnd() - m_plt.yStart()) * (yTicks.length - 1 - i) / m_plt.yTicks();
             String str_currentY = String.format("%.2f", currentY);
-            g2d.drawString(str_currentY, m_plt.xStartPX() + xShift - m_yLabelOffset, yTicks[i] - fm.getHeight() / 2 + fm.getAscent());
+            g2d.drawString(str_currentY, m_plt.xStartPX() + xShift - (int) m_config.get("ylabel_offset"), yTicks[i] - fm.getHeight() / 2 + fm.getAscent());
         }
     }
 
+    @Override
     public void paint(Graphics g){
         drawAxis(g);
         drawTicks(g);
+    }
+
+    @Override
+    public Map<String, Object> init(){
+        Map<String, Object> config = new HashMap<>();
+        config.put("tick_size", DefaultPlotConfig.TICK_SIZE);
+        config.put("xlabel_offset", DefaultPlotConfig.XLABEL_OFFSET);
+        config.put("ylabel_offset", DefaultPlotConfig.YLABEL_OFFSET);
+
+        return config;
     }
 }

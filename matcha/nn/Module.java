@@ -4,9 +4,9 @@ import java.util.List;
 
 import matcha.engine.Tensor;
 
-public abstract class Module {
+public interface Module {
 
-    abstract Tensor forward(Tensor x);
+    public Tensor forward(Tensor x);
 
-    abstract List<Tensor> parameters();
+    public List<Tensor> parameters();
 }

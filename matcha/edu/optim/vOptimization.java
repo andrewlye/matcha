@@ -4,7 +4,7 @@ import java.util.List;
 
 import matcha.edu.engine.Value;
 
-public abstract class Optimization {
+public abstract class vOptimization {
     private List<Value> params;
 
     public Optimization(List<Value> params){
@@ -16,4 +16,6 @@ public abstract class Optimization {
             param.setGradient(0.0);
         }
     }
+
+    public abstract void step();
 }

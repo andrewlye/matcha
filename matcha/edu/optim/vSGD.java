@@ -4,7 +4,7 @@ import java.util.List;
 
 import matcha.edu.engine.Value;
 
-public class SGD extends Optimization{
+public class vSGD extends Optimization{
     private List<Value> params;
     private double lr;
 

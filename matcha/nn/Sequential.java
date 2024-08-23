@@ -5,7 +5,7 @@ import java.util.List;
 
 import matcha.engine.Tensor;
 
-public class Sequential extends Module {
+public class Sequential implements Module {
     List<Module> layers;
 
     public Sequential(List<Module> layers){

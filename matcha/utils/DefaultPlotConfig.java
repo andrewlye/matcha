@@ -18,6 +18,6 @@ public final class DefaultPlotConfig {
     public static final int YLABEL_OFFSET = 50;
 
     public static final int MARKER_SIZE = 4;
-    public static final java.awt.Color MARKER_FILL = java.awt.Color.decode("#a2d2ff");
+    public static final String MARKER_FILL = "#a2d2ff";
     public static final float LINE_STROKE = 1.5f;
 }
