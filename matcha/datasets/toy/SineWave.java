@@ -2,6 +2,7 @@ package matcha.datasets.toy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import matcha.nn.Initializer;
  * Generates batched or singular (x,y) pair samples from a sine wave of specified amplitude, frequency, phase, domain, and noise.
  * @author andrew ye
  */
-public class SineWave implements Dataset{
+public class SineWave extends Dataset{
   double m_A; // amplitutde
   double m_f; // frequency
   double m_phase; // phase shift
@@ -107,7 +108,6 @@ public class SineWave implements Dataset{
 
   public List<Tensor> data() { return m_data; }
   public List<Tensor> target() { return m_target; }
-
   public Map<String, Number> config(){ return m_config; }
 
 }

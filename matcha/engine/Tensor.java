@@ -1,6 +1,7 @@
 package matcha.engine;
 
 import matcha.engine.threads.matMulThread;
+import matcha.utils.Tensors;
 import matcha.utils.math.LinAlg;
 
 import java.util.ArrayList;
@@ -278,7 +279,7 @@ public class Tensor implements Iterable<Double>{
         double dOut[] = new double[m_data.length];
         for(int i = 0; i < m_shape[0]; i++){
             for(int j = 0; j < m_shape[1]; j++){
-                dOut[i*m_shape[0] + j] = m_data[i*m_shape[0] + j] + t_B.m_data[j];
+                dOut[i*m_shape[1] + j] = m_data[i*m_shape[1] + j] + t_B.m_data[j];
             }
         }
 
@@ -296,7 +297,7 @@ public class Tensor implements Iterable<Double>{
                 }
             };
             t_C.m_backward = back;
-            t_B.m_gradFn = GradFunctions.AddBiasBackward;
+            t_C.m_gradFn = GradFunctions.AddBiasBackward;
         } else {
             t_C = new Tensor(this.m_shape, dOut);
         }
@@ -452,17 +453,15 @@ public class Tensor implements Iterable<Double>{
                     for(int r = 0; r < this.m_shape[0]; r++){
                         for(int c = 0; c < t_B.m_shape[1]; c++){
                             for(int k = 0; k < t_B.m_shape[0]; k++){
-                                if (m_gradEnabled)
-                                    this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
-                                if (t_B.m_gradEnabled)
-                                    t_B.m_grad[storageIndex(t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                if (m_gradEnabled) this.m_grad[storageIndex(new int[]{r, k})] += t_B.m_data[storageIndex(t_B.m_shape, new int[]{k, c}, t_B.dataLayout)] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
+                                if (t_B.m_gradEnabled) t_B.m_grad[storageIndex(t_B.m_shape,new int[]{k, c}, t_B.dataLayout)] += this.m_data[storageIndex(new int[]{r, k})] * t_C.m_grad[storageIndex(shapeOut, new int[]{r, c}, t_C.dataLayout)];
                             }
                         }
                     }
                 };
     
                 t_C.m_backward = back;
-                t_B.m_gradFn = GradFunctions.MatrixMultiplyBackward;
+                t_C.m_gradFn = GradFunctions.MatrixMultiplyBackward;
     
             } else {
                 t_C = new Tensor(shapeOut, dataOut);

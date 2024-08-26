@@ -1,5 +1,6 @@
 package matcha.engine;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.List;
 
 import matcha.engine.Tensor.AxisIterator;
 import matcha.engine.Tensor.TensorIterator;
+import matcha.utils.Tensors;
 
 /**
  * Functionals: Loss functions
@@ -71,9 +73,13 @@ public final class FN_Loss {
             targetPredictions[i] = input.get(sampleStart); // add the input value @ target to the total list of predictions
         }
 
-        Tensor t_C = new Tensor(new int[]{1}, new double[]{mean(m_log(targetPredictions))}, input.m_gradEnabled);
+        Tensor t_C;
 
         if (input.m_gradEnabled){
+            List<Tensor> children = new ArrayList<>();
+            children.add(input);
+            t_C = new Tensor(new int[]{1}, new double[]{mean(m_log(targetPredictions))}, input.m_gradEnabled, children);
+
             Backward back = () -> {
                 List<int[]> samplesBack = getIndicesAlong(input, 1);
                 TensorIterator itTargetsBack = target.iterator();
@@ -91,6 +97,9 @@ public final class FN_Loss {
 
             return t_C;
         } else{
+            
+            t_C = new Tensor(new int[]{1}, new double[]{mean(m_log(targetPredictions))}, input.m_gradEnabled);
+
             return t_C;
         }
     }
@@ -116,9 +125,13 @@ public final class FN_Loss {
             targetPredictions[i] = input.get(sampleStart);
         }
 
-        Tensor t_C = new Tensor(new int[]{1}, new double[]{sum(m_log(targetPredictions))}, input.m_gradEnabled);
+        Tensor t_C;
 
         if (input.m_gradEnabled){
+            List<Tensor> children = new ArrayList<>();
+            children.add(input);
+            t_C = new Tensor(new int[]{1}, new double[]{mean(m_log(targetPredictions))}, input.m_gradEnabled, children);
+
             Backward back = () -> {
                 List<int[]> samplesBack = getIndicesAlong(input, 1);
                 TensorIterator itTargetsBack = target.iterator();
@@ -135,6 +148,9 @@ public final class FN_Loss {
 
             return t_C;
         } else{
+
+            t_C = new Tensor(new int[]{1}, new double[]{sum(m_log(targetPredictions))}, input.m_gradEnabled);
+            
             return t_C;
         }
     }
@@ -160,9 +176,14 @@ public final class FN_Loss {
             targetPredictions[i] = input.get(sampleStart);
         }
 
-        Tensor t_C = new Tensor(target.m_shape, m_log(targetPredictions), input.m_gradEnabled);
+        Tensor t_C;
 
         if (input.m_gradEnabled){
+            List<Tensor> children = new ArrayList<>();
+            children.add(input);
+
+            t_C = new Tensor(target.m_shape, m_log(targetPredictions), input.m_gradEnabled, children);
+
             Backward back = () -> {
                 List<int[]> samplesBack = getIndicesAlong(input, 1);
                 TensorIterator itTargetsBack = target.iterator();
@@ -179,6 +200,8 @@ public final class FN_Loss {
 
             return t_C;
         } else{
+
+            t_C = new Tensor(target.m_shape, m_log(targetPredictions), input.m_gradEnabled);
             return t_C;
         }
     }
@@ -197,23 +220,28 @@ public final class FN_Loss {
 
         mse = (reduction.equals("mean")) ? mse / input.size() : mse;
 
-        Tensor t_C = new Tensor(new int[]{1}, new double[]{mse}, input.m_gradEnabled || target.m_gradEnabled);
+        Tensor t_C;
 
         if (input.m_gradEnabled || target.m_gradEnabled){
-            
+            List<Tensor> children = new ArrayList<>();
+            if (input.m_gradEnabled) children.add(input);
+            if (target.m_gradEnabled) children.add(target);
+
+            t_C = new Tensor(new int[]{1}, new double[]{mse}, input.m_gradEnabled || target.m_gradEnabled, children);
+
             Backward back;
             if (reduction.equals("mean")){
                 back = () -> {
                     for(int i = 0; i < input.m_data.length; i++){
-                        if (input.m_gradEnabled) input.m_grad[i] += -2.0*(target.m_data[i] - input.m_data[i]) / input.size();
-                        if (target.m_gradEnabled) target.m_grad[i] += 2.0*(target.m_data[i] - input.m_data[i]) / input.size();
+                        if (input.m_gradEnabled) input.m_grad[i] += -2.0*t_C.m_grad[0]*(target.m_data[i] - input.m_data[i]) / input.size();
+                        if (target.m_gradEnabled) target.m_grad[i] += 2.0*t_C.m_grad[0]*(target.m_data[i] - input.m_data[i]) / input.size();
                     }
                 };
             } else {
                 back = () -> {
                     for(int i = 0; i < input.m_grad.length; i++){
-                        if (input.m_gradEnabled) input.m_grad[i] += -2.0*(target.m_data[i] - input.m_data[i]);
-                        if (target.m_gradEnabled) target.m_grad[i] += 2.0*(target.m_data[i] - input.m_data[i]);
+                        if (input.m_gradEnabled) input.m_grad[i] += -2.0*t_C.m_grad[0]*(target.m_data[i] - input.m_data[i]);
+                        if (target.m_gradEnabled) target.m_grad[i] += 2.0*t_C.m_grad[0]*(target.m_data[i] - input.m_data[i]);
                     }
                 };
             }
@@ -222,6 +250,7 @@ public final class FN_Loss {
             t_C.m_gradFn = GradFunctions.MSELossBackward;
             return t_C;
         } else {
+            t_C = new Tensor(new int[]{1}, new double[]{mse}, input.m_gradEnabled || target.m_gradEnabled);
             return t_C;
         }
     }
