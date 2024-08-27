@@ -6,14 +6,23 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 - `matcha.engine` Main code for tensor operations, functions, threads, and differentiation.
 - `matcha.nn` Contains various useful neural network modules and loss functions.
 - `matcha.optim` Contains various optimization algorithms.
-- `matcha.dataset` Pre-built and ready to train tensor datasets.
+- `matcha.datasets` Pre-built and ready to train tensor datasets.
 - `matcha.utils` Plotting, tensor visualizations, and more!
-- `matcha.edu` A scalar version of matcha useful for understanding fundamental neural networks concepts (wip).
+- `matcha.edu` A scalar-based version of matcha useful for learning and understanding fundamental neural network concepts (wip).
 
 
 ## Example
-Here is a simple example of a Multi-Layer Perceptron built in matcha learning to fit the `SineWave` toy dataset.
+Here is a simple example of a Multi-Layer Perceptron built entirely in matcha trained on the `SineWave` toy dataset. All figures were created using `matcha.utils.jPlot`.
 
+<figure>
+<img src="img/samples.png" width="500px" /> <img src="img/fit_20.png" width="500px" />
+<figcaption> <b>Fig 1.</b> The original SineWave dataset (left) and the model's predictions after 20 epochs (right).</figcaption>
+</figure>
+
+<figure>
+<img src="img/fit_0.png" width="500px" /> <img src="img/fit_5.png" width="500px" />
+<figcaption> <b>Fig 2.</b> The model's predictions without training (left) and after 5 epochs (right).</figcaption>
+</figure>
 
 
 ### Code
