@@ -94,16 +94,17 @@ public class Example{
 
                 lossSum += loss.data()[0];
             }
+            // print average loss per batch
             if (i % 5 == 4 || i == 0)
-                System.out.println("Epoch: " + (i + 1) + ", average loss: " + (lossSum / 4.0));
+                System.out.println("Epoch: " + (i + 1) + ", average loss: " + (lossSum / sineData.size()));
         }
 ```
 ```
-        Epoch: 1, average loss: 5.252128635146163
-        Epoch: 5, average loss: 0.597272164197843
-        Epoch: 10, average loss: 0.47446241197420985
-        Epoch: 15, average loss: 0.453805811609508
-        Epoch: 20, average loss: 0.43520514472577043
+            Epoch: 1, average loss: 0.1550326100760993
+            Epoch: 5, average loss: 0.022698460109599656
+            Epoch: 10, average loss: 0.017641122802328508
+            Epoch: 15, average loss: 0.01622257515469674
+            Epoch: 20, average loss: 0.015308237926187455
 ```
 ```Java
         // initialize new figure
