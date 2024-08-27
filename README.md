@@ -14,15 +14,13 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 ## Example
 Here is a simple example of a Multi-Layer Perceptron built entirely in matcha trained on the `SineWave` toy dataset. All figures were created using `matcha.utils.jPlot`.
 
-<figure>
-<img src="img/samples.png" width="300" /> <img src="img/fit_20.png" width="300" />
-<figcaption> <b>Fig 1.</b> The original SineWave dataset (left) and the model's predictions after 20 epochs (right).</figcaption>
-</figure>
+![](img/samples.png) | ![](img/fit_20.png)
+|:-:|:-:|
+<p align=center><b>Fig 1.</b> The original SineWave dataset (left) and the model's predictions after 20 epochs (right).</p>
 
-<figure>
-<img src="img/fit_0.png" width="300" /> <img src="img/fit_5.png" width="300" />
-<figcaption> <b>Fig 2.</b> The model's predictions without training (left) and after 5 epochs (right).</figcaption>
-</figure>
+![](img/fit_0.png) | ![](img/fit_5.png)
+|:-:|:-:|
+<p align=center><b>Fig 2.</b> The model's predictions without training (left) and after 5 epochs (right).</p>
 
 
 ### Code
