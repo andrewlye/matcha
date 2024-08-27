@@ -11,12 +11,12 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 - `matcha.edu` A scalar-based version of matcha useful for learning and understanding fundamental neural network concepts (wip).
 
 
-## Example
+## Example: Sine Wave Dataset
 Here is a simple example of a Multi-Layer Perceptron built entirely in matcha trained on the `SineWave` toy dataset. All figures were created using `matcha.utils.jPlot`.
 
 ![](img/samples.png) | ![](img/fit_20.png)
 |:-:|:-:|
-<p align=center><b>Fig 1.</b> The original SineWave dataset (left) and the model's predictions after 20 epochs (right).</p>
+<p align=center><b>Fig 1.</b> The original SineWave dataset (left) and the model's predictions after 20 epochs (right) against the actual underlying sine function (solid line).</p>
 
 ![](img/fit_0.png) | ![](img/fit_5.png)
 |:-:|:-:|
