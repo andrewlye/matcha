@@ -12,7 +12,7 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 
 
 ## Example: Sine Wave Dataset
-Here is a simple example of a Multi-Layer Perceptron built entirely in matcha trained on the `SineWave` toy dataset. All figures were created using `matcha.utils.jPlot`.
+Here is a simple example of a Multi-Layer Perceptron built entirely in matcha trained on the `SineWave` toy dataset. The dataset generates $n$ random uniform values $x_i$ across $a$ to $b$ and the corresponding value $y_i$ such that $y_i = A\sin{(\omega x_i + \phi)} + N(\mu, \sigma)$, where $N$ denotes random noise values selected across a Gaussian distribution with mean $\mu$ and standard deviation $\sigma$. The default values for the dataset are $a=-\pi$, $b=\pi$, $A=1$, $\omega=1$, $\phi=0$, $\mu=0$, and $\sigma=0.1A$. These settings can be updated either by passing a partial or complete configuration mapping or during initialization (see `matcha.datasets.toy.SineWave`). All figures were created using `matcha.utils.jPlot`.
 
 ![](img/samples.png) | ![](img/fit_20.png)
 |:-:|:-:|
