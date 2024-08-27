@@ -19,10 +19,10 @@ public class SineWave extends Dataset{
   double m_f; // frequency
   double m_phase; // phase shift
 
-  Map<String, Number> m_config; // configs
+  private Map<String, Number> m_config; // configs
 
-  List<Tensor> m_data;
-  List<Tensor> m_target;
+  private List<Tensor> m_data;
+  private List<Tensor> m_target;
 
   /**
    * Initializes a sin wave dataset of the form y(x) = Asin(fx+phase)
@@ -105,6 +105,8 @@ public class SineWave extends Dataset{
   public int size(){
     return m_data.size();
   }
+
+  public Object getConfig(String s){ return m_config.get(s); }
 
   public List<Tensor> data() { return m_data; }
   public List<Tensor> target() { return m_target; }
