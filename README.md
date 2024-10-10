@@ -1,6 +1,9 @@
 # matcha
 *Neural networks in Java.*
 
+## To-Do
+- Better datasets, Adam/Adagrad, momentum
+
 ## Overview
 A standalone, simple yet powerful neural networks library and tensor engine built on Java's standard library featuring torch-like API, multithreading, auto differentiation, and more. Inspired by [PyTorch](https://pytorch.org/) and Andrej Karpathy's [micrograd](https://github.com/karpathy/micrograd).
 - `matcha.engine` Main code for tensor operations, functions, threads, and differentiation.
