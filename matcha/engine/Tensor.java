@@ -557,6 +557,20 @@ public class Tensor implements Iterable<Double>{
         return m_shape;
     }
 
+    public void reshape(int... shape) {
+        if (shape.length == 0) shape = new int[] {1, 1};   
+        // shape dimensions must be greater than 0
+        for (int d : shape) if (d < 1) throw new IllegalArgumentException("Error: dimensions must be > 0!");
+        
+        // the number of elements in data must be consistent with dimension of shape
+        int numElements = 1;
+        for (int i = 0; i < shape.length; i++)
+            numElements *= shape[i];
+        if (m_data != null && numElements != m_data.length) 
+            throw new IllegalArgumentException("Error: number of elements specified by dimensions (" + numElements +  ") are inconsistent with the length of data provided (" + m_data.length + ").");
+        m_shape = shape;
+    }
+
     /**
      * @return the number of elements in this tensor (i.e. product of its dimensions);
      */

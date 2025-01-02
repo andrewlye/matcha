@@ -1,7 +1,6 @@
 *.class
 .DS_Store
-
 .vscode/
-
 bin/
 testing/
+.cache/

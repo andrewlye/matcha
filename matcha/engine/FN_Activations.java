@@ -108,11 +108,9 @@ public final class FN_Activations {
         double[] dataOut = t_A.m_data.clone();
         for(int i = 0; i < dataOut.length; i++) dataOut[i] -= maxData[i]; // subtract maximum from each sample as to not explode weights.
         dataOut = Arrays.stream(dataOut).map(x -> Math.exp(x)).toArray(); // exponentiate values.
-
         // create a psuedo tensor to match each exponentiated element with their sum along a slice.
         double[] expSums = fillDataAlong(t_A, getIndicesAlong(t_A, axis), getSumsAlong(t_A, axis, dataOut), axis);
         for(int i = 0; i < dataOut.length; i++) dataOut[i] /= expSums[i]; // normalize values.
-        
         // create output tensor
         Tensor t_B;
         if (t_A.m_gradEnabled) {

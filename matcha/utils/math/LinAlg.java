@@ -2,6 +2,7 @@ package matcha.utils.math;
 
 import matcha.engine.*;
 import java.util.List;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -112,6 +113,22 @@ public class LinAlg {
 
         return ranges;
     }
+
+    public static double[] flatten(Object v) {
+        if (!v.getClass().isArray()) throw new IllegalArgumentException("Error: calling flatten on a non-arraylike object.");
+        var data = new ArrayList<Double>();
+        flatten(v, data);
+        return data.stream().mapToDouble(x -> x).toArray();
+    }
+
+    public static void flatten(Object v, List<Double> data) {
+        if (!v.getClass().isArray()) {
+            if (!(v instanceof Number)) throw new IllegalArgumentException("Error: array consists of non-Number objects.");
+            data.add(((Number)v).doubleValue());
+            return;
+        }
+        for (int i = 0; i < Array.getLength(v); i++) flatten(Array.get(v, i), data);
+    }
     
     /**
      * Returns the dimensions of an array (or nested array) of objects.
@@ -123,53 +140,10 @@ public class LinAlg {
     }
 
     private static int[] getDims(Object v, List<Integer> dims) {
-        if (v instanceof Object[]) {
-            Object[] v_arr = (Object[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof byte[]) {
-            byte[] v_arr = (byte[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof short[]) {
-            short[] v_arr = (short[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof int[]) {
-            int[] v_arr = (int[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof long[]) {
-            long[] v_arr = (long[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof float[]) {
-            float[] v_arr = (float[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof double[]) {
-            double[] v_arr = (double[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof boolean[]) {
-            boolean[] v_arr = (boolean[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-        if (v instanceof char[]) {
-            char[] v_arr = (char[]) v;
-            dims.add(v_arr.length);
-            return (v_arr.length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(v_arr[0], dims);
-        }
-
-        return dims.stream().mapToInt(x -> x).toArray();
+        if (!v.getClass().isArray()) return dims.stream().mapToInt(x -> x).toArray();
+        int length = Array.getLength(v);
+        dims.add(length);
+        return (length == 0) ? dims.stream().mapToInt(x -> x).toArray() : getDims(Array.get(v, 0), dims);
     }
 
 }

@@ -4,11 +4,11 @@ import java.util.List;
 
 import matcha.edu.engine.Value;
 
-public class vSGD extends Optimization{
+public class vSGD extends vOptimization{
     private List<Value> params;
     private double lr;
 
-    public SGD(List<Value> params, double lr){
+    public vSGD(List<Value> params, double lr){
         super(params);
         this.params = params;
         this.lr = lr;

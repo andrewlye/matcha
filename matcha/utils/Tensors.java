@@ -1,9 +1,11 @@
 package matcha.utils;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import matcha.engine.DataRepresentation;
 import matcha.engine.Tensor;
+import matcha.engine.Tensor.TensorIterator;
 import matcha.utils.math.LinAlg;
 
 /**
@@ -30,9 +32,27 @@ public class Tensors {
         return toString(t.grad(), t.shape(), new int[t.shape().length], 0, new StringBuilder(), t.dataLayout);
     }
 
-    public static Tensor toTensor(Object[] tensorLike) {
-        if (!tensorLike.getClass().isArray()) throw new IllegalArgumentException("Error: tensor-like object must be an array!");
-        return null;
+    public static Tensor toTensor(Object tensorLike) {
+        return toTensor(tensorLike, false);
+    }
+
+    public static Tensor toTensor(Object tensorLike, boolean gradEnabled) {
+        return new Tensor(LinAlg.getDims(tensorLike), LinAlg.flatten(tensorLike), gradEnabled);
+    }
+
+    public static Object toArray(Tensor t) {
+        Object arr = Array.newInstance(double.class, t.shape());
+        TensorIterator it = t.iterator();
+        toArray(arr, it);
+        return arr;
+    }
+
+    private static void toArray(Object arr, TensorIterator it) {
+        if (!Array.get(arr, 0).getClass().isArray()) {
+            for (int i = 0; i < Array.getLength(arr); i++) Array.setDouble(arr, i, it.next());
+            return;
+        }
+        for (int i = 0; i < Array.getLength(arr); i++) toArray(Array.get(arr, i), it);
     }
 
     /**

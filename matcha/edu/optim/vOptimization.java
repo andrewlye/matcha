@@ -7,7 +7,7 @@ import matcha.edu.engine.Value;
 public abstract class vOptimization {
     private List<Value> params;
 
-    public Optimization(List<Value> params){
+    public vOptimization(List<Value> params){
         this.params = params;
     }
     
