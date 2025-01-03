@@ -1,6 +1,7 @@
 package matcha.datasets;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,35 +20,60 @@ import matcha.engine.Tensor;
 
 public class MNIST extends Dataset {
     private List<List<Tensor>> samples;
-    public MNIST(String cacheDir) throws IOException {
-        this(cacheDir, -1, true);
+    public MNIST(String cache) {
+        this(cache, -1, 1, true);
     }
 
-    public MNIST(String cacheDir, int nSamples) throws IOException {
-        this(cacheDir, nSamples, true);
+    public MNIST(String cache, int nSamples) {
+        this(cache, nSamples, 1, true);
     }
 
-    public MNIST(String cacheDir, int nSamples, boolean shuffle) throws IOException {
+    public MNIST(String cache, int nSamples, int batchSize) {
+        this(cache, nSamples, batchSize, true);
+    }
+
+    public MNIST(String cache, int nSamples, int batchSize, boolean shuffle){
         samples = new ArrayList<>();
-        
+        FileReader fr = null;
+        try {
+            fr = new FileReader(cache);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         String line;
-        BufferedReader br = new BufferedReader(new FileReader(cacheDir));
-        line = br.readLine();
-        int i = 0;
-        while((line = br.readLine()) != null && (nSamples > 0 && i < nSamples)) {
-				String[] tokens = line.split(",");
-				double yVal = Double.parseDouble(tokens[0]);
-				String[] Xtokens = Arrays.copyOfRange(tokens, 1, tokens.length);
-				Tensor y = new Tensor(new int[]{1}, new double[]{yVal});
-				Tensor X = new Tensor(new int[]{Xtokens.length}, Arrays.stream(Xtokens).mapToDouble(x -> Double.parseDouble(x)).toArray());
-				X.reshape(28, 28);
+        BufferedReader br = new BufferedReader(fr);
+        try {
+            line = br.readLine();
+            ArrayList<ArrayList<double[]>> data = new ArrayList<>();
+            while((line = br.readLine()) != null) {
+                    double[] XData = new double[784], yData = new double[1];
+                    String[] tokens = line.split(",");
+                    yData[0] = Double.parseDouble(tokens[0]);
+                    for (int j = 1; j < tokens.length; j++) XData[j-1] = Double.parseDouble(tokens[j]);
+                    var sample = new ArrayList<double[]>();
+                    sample.add(XData); sample.add(yData);
+                    data.add(sample);
+            }
+            br.close();
+            
+            if (shuffle) Collections.shuffle(samples);
+            nSamples = (nSamples > 0) ? nSamples : data.size();
+            for (int i = 0; i < nSamples; i += batchSize) {
+                ArrayList<Double> XBatchData = new ArrayList<>(), yBatchData = new ArrayList<>();
+                for (int j = 0; j < batchSize && i + j < nSamples; j++) {
+                    var sample = data.get(i + j);
+                    for (double d : sample.get(0)) XBatchData.add(d);
+                    yBatchData.add(sample.get(1)[0]);
+                }
                 var sample = new ArrayList<Tensor>();
-                sample.add(X); sample.add(y);
+                sample.add(new Tensor(new int[]{yBatchData.size(), 28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
+                sample.add(new Tensor(new int[]{yBatchData.size(), 1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
                 samples.add(sample);
-                i++;
-		}
-        br.close();
-        if (shuffle) Collections.shuffle(samples);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

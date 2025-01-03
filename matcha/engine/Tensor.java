@@ -57,7 +57,7 @@ public class Tensor implements Iterable<Double>{
     }
 
     // Creates a zero-initialized tensor of a specified shape.
-    public Tensor(int[] shape){
+    public Tensor(int... shape){
         this(shape, null, false);
     }
 
@@ -69,6 +69,15 @@ public class Tensor implements Iterable<Double>{
     // Creates a zero-initialized tensor of a specified shape with or without differentiation.
     public Tensor(int[] shape, boolean gradEnabled){
        this(shape, null, true);
+    }
+
+    public Tensor(Object o) {
+        this(o, false);
+    }
+
+    public Tensor(Object o, boolean gradEnabled) {
+        this(LinAlg.getDims(o), LinAlg.flatten(o), gradEnabled);
+        System.out.println("Object constructor.");
     }
 
     // Private constructor used for auto differentiation and chain-ruling.

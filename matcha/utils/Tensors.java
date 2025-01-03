@@ -14,6 +14,7 @@ import matcha.utils.math.LinAlg;
  * @author andrewye
  */
 public class Tensors {
+    public static final String DEFAULT_FORMAT = "%5.1f";
     /**
      * Returns a string-representation of a Tensor object
      * 
@@ -21,15 +22,29 @@ public class Tensors {
      * @return a string-representation of the tensor
      */
     public static String toString(Tensor t) {
+        return toString(t, DEFAULT_FORMAT);
+    }
+
+    /**
+     * Returns a string-representation of a Tensor object
+     * 
+     * @param t the tensor object to read
+     * @return a string-representation of the tensor
+     */
+    public static String toString(Tensor t, String format) {
         StringBuilder sb = new StringBuilder();
         sb.append(t.toString() + '\n');
-        sb.append(toString(t.data(), t.shape(), new int[t.shape().length], 0, new StringBuilder(), t.dataLayout));
+        sb.append(toString(t.data(), t.shape(), new int[t.shape().length], 0, new StringBuilder(), t.dataLayout, format));
 
         return sb.toString();
     }
 
     public static String showGrad(Tensor t) {
-        return toString(t.grad(), t.shape(), new int[t.shape().length], 0, new StringBuilder(), t.dataLayout);
+        return showGrad(t, DEFAULT_FORMAT);
+    }
+
+    public static String showGrad(Tensor t, String format) {
+        return toString(t.grad(), t.shape(), new int[t.shape().length], 0, new StringBuilder(), t.dataLayout, format);
     }
 
     public static Tensor toTensor(Object tensorLike) {
@@ -37,7 +52,7 @@ public class Tensors {
     }
 
     public static Tensor toTensor(Object tensorLike, boolean gradEnabled) {
-        return new Tensor(LinAlg.getDims(tensorLike), LinAlg.flatten(tensorLike), gradEnabled);
+        return new Tensor(tensorLike, gradEnabled);
     }
 
     public static Object toArray(Tensor t) {
@@ -67,7 +82,7 @@ public class Tensors {
      * @return
      */
     private static String toString(double[] data, int[] shape, int[] idxs, int d, StringBuilder sb,
-            DataRepresentation data_layout) {
+            DataRepresentation data_layout, String format) {
         if (shape.length == 1)
             return Arrays.toString(data);
 
@@ -89,7 +104,7 @@ public class Tensors {
                 switch (data_layout) {
                     case ROW_MAJOR:
                     default:
-                        sb.append(data[LinAlg.rmo(shape, idxs)]);
+                        sb.append(String.format(format, data[LinAlg.rmo(shape, idxs)]));
                 }
 
                 if (i != shape[d] * shape[d + 1] - 1)
@@ -102,7 +117,7 @@ public class Tensors {
             for (int i = 0; i < shape[d]; i++) {
                 int[] new_idxs = idxs.clone();
                 new_idxs[d] = i;
-                sb.append(toString(data, shape, new_idxs, d + 1, new StringBuilder(), data_layout));
+                sb.append(toString(data, shape, new_idxs, d + 1, new StringBuilder(), data_layout, format));
                 if (i != shape[d] - 1) {
                     sb.append(",\n");
                     for (int sp = 0; sp <= d; sp++) {
