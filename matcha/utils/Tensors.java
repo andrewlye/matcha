@@ -33,7 +33,7 @@ public class Tensors {
      */
     public static String toString(Tensor t, String format) {
         StringBuilder sb = new StringBuilder();
-        sb.append(t.toString() + '\n');
+        sb.append(t.info() + '\n');
         sb.append(toString(t.data(), t.shape(), new int[t.shape().length], 0, new StringBuilder(), t.dataLayout, format));
 
         return sb.toString();

@@ -9,7 +9,6 @@ import matcha.engine.Tensor;
  * All datasets should implement the dataset interface for train test modularity.
  */
 public abstract class Dataset implements Iterable<List<Tensor>>{
-  
   /**
    * Get the ith sample in the dataset
    * @param i

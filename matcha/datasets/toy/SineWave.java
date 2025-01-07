@@ -63,9 +63,9 @@ public class SineWave extends Dataset{
 
     for(int i = 0; i < n; i++){
       double x_i = Initializer.rand.nextDouble() * ((double) m_config.get("x_end") - (double) m_config.get("x_start")) + (double) m_config.get("x_start");
-      t_X.set(new int[]{i, 0}, x_i); 
+      t_X.set(x_i, new int[]{i, 0}); 
       double noise = Initializer.rand.nextGaussian() * (double) m_config.get("scale") + (double) m_config.get("loc");
-      t_y.set(new int[]{i, 0}, m_A * Math.sin(m_f * x_i + m_phase) + noise);
+      t_y.set(m_A * Math.sin(m_f * x_i + m_phase) + noise, new int[]{i, 0});
     }
   
     m_data.add(t_X);

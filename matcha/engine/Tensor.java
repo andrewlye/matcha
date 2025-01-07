@@ -38,7 +38,7 @@ public class Tensor implements Iterable<Double>{
      * @param gradEnabled boolean indicating if auto differentiation is enabled. False by default.
      */
     public Tensor(int[] shape, double[] data, boolean gradEnabled){
-        // if shape is null, tensor become a scalars (1x1)
+        // if shape is null, tensor becomes a scalar (1x1)
         if (shape.length == 0) shape = new int[] {1, 1};
         
         // shape dimensions must be greater than 0
@@ -227,6 +227,8 @@ public class Tensor implements Iterable<Double>{
     public Tensor min(int axis){
         throw new UnsupportedOperationException();
     }
+
+    public double sum() { return Arrays.stream(m_data).sum(); }
 
     public Tensor sum(int axis){
         throw new UnsupportedOperationException();
@@ -545,6 +547,11 @@ public class Tensor implements Iterable<Double>{
         return m_data;
     }
 
+    public double item() {
+        if (m_data.length != 1) throw new IllegalStateException("Error: calling item() on a tensor that contains more than one item.");
+        return m_data[0];
+    }
+
     /**
      * @return the gradient data stored by this tensor.
      */
@@ -569,7 +576,7 @@ public class Tensor implements Iterable<Double>{
     public void reshape(int... shape) {
         if (shape.length == 0) shape = new int[] {1, 1};   
         // shape dimensions must be greater than 0
-        for (int d : shape) if (d < 1) throw new IllegalArgumentException("Error: dimensions must be > 0!");
+        for (int d : shape) if (d < 1 && d != -1) throw new IllegalArgumentException("Error: dimensions must be > 0 or -1!");
         
         // the number of elements in data must be consistent with dimension of shape
         int numElements = 1;
@@ -594,7 +601,7 @@ public class Tensor implements Iterable<Double>{
      * @param idxs array indices (x,y,z,...) of the same length as the shape.
      * @return the element stored at tensor index idx.
      */
-    public double get(int[] idxs) {
+    public double get(int... idxs) {
         return m_data[storageIndex(idxs)];
     }
 
@@ -603,7 +610,7 @@ public class Tensor implements Iterable<Double>{
      * @param idxs array indices (x,y,z,...) of the same length as the shape.
      * @param x double value to set.
      */
-    public void set(int[] idxs, double x) {
+    public void set(double x, int... idxs) {
         m_data[storageIndex(idxs)] = x;
     }
 
@@ -658,6 +665,10 @@ public class Tensor implements Iterable<Double>{
      */
     @Override
     public String toString() {
+        return Tensors.toString(this);
+    }
+
+    public String info() {
         if (m_gradEnabled){
             if (m_gradFn != GradFunctions.None) return "Tensor(shape: " + formatShape() + ", gradFn=<" + m_gradFn + ">)";
             else return "Tensor(shape: " + formatShape() + ", gradEnabled=true>)";
@@ -762,7 +773,7 @@ public class Tensor implements Iterable<Double>{
      * @param idxs the element index in the tensor.
      * @return the data index of this element.
      */
-    public int storageIndex(int[] idxs){
+    public int storageIndex(int... idxs){
         return storageIndex(m_shape, idxs, dataLayout);
     }
 

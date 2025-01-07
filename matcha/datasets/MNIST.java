@@ -56,8 +56,9 @@ public class MNIST extends Dataset {
                     data.add(sample);
             }
             br.close();
+
+            if (shuffle) Collections.shuffle(data);
             
-            if (shuffle) Collections.shuffle(samples);
             nSamples = (nSamples > 0) ? nSamples : data.size();
             for (int i = 0; i < nSamples; i += batchSize) {
                 ArrayList<Double> XBatchData = new ArrayList<>(), yBatchData = new ArrayList<>();
@@ -76,6 +77,28 @@ public class MNIST extends Dataset {
         }
     }
 
+    public void reshapeX(int... shape) {
+        for (var sample : samples) {
+            int[] bShape = new int[shape.length+1];
+            bShape[0] = sample.get(0).shape()[0];
+            for (int i = 0; i < shape.length; i++) {
+                bShape[i+1] = shape[i];
+            }
+            sample.get(0).reshape(bShape);
+        }
+    }
+
+    public void reshapeY(int... shape) {
+        for (var sample : samples) {
+            int[] bShape = new int[shape.length+1];
+            bShape[0] = sample.get(1).shape()[0];
+            for (int i = 0; i < shape.length; i++) {
+                bShape[i+1] = shape[i];
+            }
+            sample.get(1).reshape(bShape);
+        }
+    }
+
     @Override
     public List<Tensor> get(int i) {
         return samples.get(i);
@@ -86,21 +109,27 @@ public class MNIST extends Dataset {
         return samples.size();
     }
 
-    public void show(Tensor X) {
+    public void show(Tensor X) { show(X, 25); }
+
+    public void show(Tensor X, int pixelSize) {
+        if (pixelSize <= 0) throw new IllegalArgumentException("Error: pixel size must be >0.");
+        if (!Arrays.equals(X.shape(), new int[]{28, 28})) 
+            throw new IllegalArgumentException("Error: input tensor must be of shape (28, 28).");
         JFrame frame = new JFrame();
         frame.setSize(300, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
-        frame.add(new Digit(X));
+        frame.add(new Digit(X, pixelSize));
         frame.setVisible(true);
     }
     
 }
 
 class Digit extends JComponent {
-    public static final int WIDTH = 30;
+    private int WIDTH;
     private Tensor X;
-    public Digit(Tensor X) {
+    public Digit(Tensor X, int width) {
         this.X = X;
+        WIDTH = width;
     }
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;

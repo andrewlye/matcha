@@ -1,12 +1,17 @@
 package matcha.nn;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import matcha.engine.Tensor;
 
 public class Sequential implements Module {
     List<Module> layers;
+
+    public Sequential(Module... layers) {
+        this.layers = Arrays.asList(layers);
+    }
 
     public Sequential(List<Module> layers){
         this.layers = layers;
