@@ -13,10 +13,16 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 - `matcha.utils` Plotting, tensor visualizations, and more!
 - `matcha.edu` A scalar-based version of matcha useful for learning and understanding fundamental neural network concepts (wip).
 
+
 ## Example: k-Classification on MNIST
+<details open>
+    <summary>Description</summary>
 The Modified National Institute of Standards and Technology (MNIST) dataset consists of 60,000 training and 10,000 testing images of handwritten numeric, and is widely used for to train and test a wide variety machine learning models. In this example, we demonstrate how to train a neural network with around 250,000 parameters on a sizeable subset of MNIST.
+</details>
 
 ## Example: Regression on Sine Wave Dataset
+<details>
+    <summary>Description</summary>
 Here is a simple example of a Multi-Layer Perceptron built entirely in matcha trained on the `SineWave` toy dataset. The dataset generates $n$ random uniform values $x_i$ across $a$ to $b$ and the corresponding value $y_i$ such that $y_i = A\sin{(\omega x_i + \phi)} + N(\mu, \sigma)$, where $N$ denotes random noise values selected across a Gaussian distribution with mean $\mu$ and standard deviation $\sigma$. The default values for the dataset are $a=-\pi$, $b=\pi$, $A=1$, $\omega=1$, $\phi=0$, $\mu=0$, and $\sigma=0.1A$. These settings can be updated either by passing a partial or complete configuration mapping or during initialization (see `matcha.datasets.toy.SineWave`). All figures were created using `matcha.utils.jPlot`.
 
 ![](img/samples.png) | ![](img/fit_20.png)
@@ -26,8 +32,9 @@ Here is a simple example of a Multi-Layer Perceptron built entirely in matcha tr
 ![](img/fit_0.png) | ![](img/fit_5.png)
 |:-:|:-:|
 <p align=center><b>Fig 2.</b> The model's predictions without training (left) and after 5 epochs (right).</p>
-
-
+</details>
+<details>
+    <summary>Code</summary>
 ### Code
 ```Java
 import matcha.datasets.toy.SineWave;
@@ -144,3 +151,4 @@ public class Example{
 ```
 See figures above for plot outputs.
 ```
+</details>
