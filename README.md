@@ -15,6 +15,9 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 
 
 ## Example: k-Classification on MNIST
+![](img/mnistpreds.png) | ![](img/mnistpreds.png)
+|:-:|:-:|
+<p align=center><b>Fig 1.</b> Example model outputs for given samples (left) and the loss curve during training (right).</p>
 
 The Modified National Institute of Standards and Technology (MNIST) dataset consists of 60,000 training and 10,000 testing images of handwritten numeric, and is widely used for to train and test a wide variety machine learning models. In this example, we demonstrate how to train a neural network with around 250,000 parameters on a sizeable subset of MNIST.
 

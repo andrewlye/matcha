@@ -116,7 +116,7 @@ public class LinAlg {
 
     public static double[] flatten(Object v) {
         if (!v.getClass().isArray()) throw new IllegalArgumentException("Error: calling flatten on a non-arraylike object.");
-        var data = new ArrayList<Double>();
+        ArrayList<Double> data = new ArrayList<Double>();
         flatten(v, data);
         return data.stream().mapToDouble(x -> x).toArray();
     }

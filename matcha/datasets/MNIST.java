@@ -20,6 +20,7 @@ import matcha.engine.Tensor;
 
 public class MNIST extends Dataset {
     private List<List<Tensor>> samples;
+    private int batchSize;
 
     public static final int DISPLAY_WIDTH = 300;
     public static final int DISPLAY_HEIGHT = 300;
@@ -38,6 +39,9 @@ public class MNIST extends Dataset {
     }
 
     public MNIST(String cache, int nSamples, int batchSize, boolean shuffle){
+        if (batchSize <= 0) throw new IllegalArgumentException("Error: batch size must be > 0.");
+        this.batchSize = batchSize;
+
         samples = new ArrayList<>();
         FileReader fr = null;
         try {
@@ -73,8 +77,14 @@ public class MNIST extends Dataset {
                     yBatchData.add(sample.get(1)[0]);
                 }
                 var sample = new ArrayList<Tensor>();
-                sample.add(new Tensor(new int[]{yBatchData.size(), 28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
-                sample.add(new Tensor(new int[]{yBatchData.size(), 1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
+                if (batchSize == 1) {
+                    sample.add(new Tensor(new int[]{28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
+                    sample.add(new Tensor(new int[]{1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
+                } else {
+                    sample.add(new Tensor(new int[]{yBatchData.size(), 28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
+                    sample.add(new Tensor(new int[]{yBatchData.size(), 1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
+                }
+                
                 samples.add(sample);
             }
         } catch (IOException e) {
@@ -83,24 +93,27 @@ public class MNIST extends Dataset {
     }
 
     public void reshapeX(int... shape) {
-        for (var sample : samples) {
-            int[] bShape = new int[shape.length+1];
-            bShape[0] = sample.get(0).shape()[0];
-            for (int i = 0; i < shape.length; i++) {
-                bShape[i+1] = shape[i];
-            }
-            sample.get(0).reshape(bShape);
-        }
+        reshape(true, shape);
     }
 
     public void reshapeY(int... shape) {
+        reshape(false, shape);
+    }
+
+    private void reshape(boolean isX, int... shape) {
+        int k = (isX) ? 0 : 1;
+        if (batchSize == 1) {
+            for (var sample : samples) sample.get(k).reshape(shape);
+            return;
+        }
+
         for (var sample : samples) {
             int[] bShape = new int[shape.length+1];
-            bShape[0] = sample.get(1).shape()[0];
+            bShape[0] = sample.get(k).shape()[0];
             for (int i = 0; i < shape.length; i++) {
                 bShape[i+1] = shape[i];
             }
-            sample.get(1).reshape(bShape);
+            sample.get(k).reshape(bShape);
         }
     }
 
@@ -118,8 +131,7 @@ public class MNIST extends Dataset {
 
     public void show(Tensor X, int pixelSize) {
         if (pixelSize <= 0) throw new IllegalArgumentException("Error: pixel size must be >0.");
-        if (!Arrays.equals(X.shape(), new int[]{IMG_LENGTH, IMG_LENGTH})) 
-            throw new IllegalArgumentException("Error: input tensor must be of shape (28, 28).");
+        if (X.size() != IMG_LENGTH * IMG_LENGTH) throw new IllegalArgumentException("Error: input tensor must be a single 784-element tensor.");
         JFrame frame = new JFrame();
         frame.setSize(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
@@ -142,7 +154,7 @@ class Digit extends JComponent {
         g2d.setColor(Color.BLUE);
         for (int i = 0; i < MNIST.IMG_LENGTH; i++) {
             for (int j = 0; j < MNIST.IMG_LENGTH; j++) {
-                int intensity = (int) X.get(new int[]{i, j});
+                int intensity = (int) X.get(i, j);
                 Color c = new Color(0, 0, 0, 255 - intensity);
                 g2d.setColor(c);
                 g2d.fillRect(j * WIDTH, i * WIDTH, WIDTH, WIDTH);
