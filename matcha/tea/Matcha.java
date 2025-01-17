@@ -14,6 +14,9 @@ import matcha.optim.SGD;
 import matcha.utils.jPlot;
 import matcha.utils.math.LinAlg;
 
+/** WORK IN PROGRESS! Some methods may be written very poorly.
+ * General purpose trainer class to wrap around a model, dataset, etc.
+ */
 public class Matcha {
     public Module model;
     public Optimization optimizer;
@@ -22,6 +25,7 @@ public class Matcha {
     private HashMap<String, String> configs;
     public static final int DEFAULT_EPOCHS = 10;
     public static final double DEFAULT_LR = 0.001;
+    public static final int BAR_LENGTH = 200;
 
     private ArrayList<Double> lossCurve = null;
 
@@ -54,8 +58,7 @@ public class Matcha {
         if (loss == null) throw new IllegalStateException("Error: please specify a loss function.");
         if (trainData == null) throw new IllegalStateException("Error: please specify a training dataset.");
 
-        int barLen = 200;
-        double inc = (double) barLen / epochs;
+        double inc = (double) BAR_LENGTH / epochs;
         lossCurve = new ArrayList<>();
         long startTime = System.nanoTime();
         System.out.println("TRAINING LOG:");
@@ -79,7 +82,7 @@ public class Matcha {
             boolean print = i > 0 && ((i % Integer.parseInt(configs.get("print_every"))) == 0 || i == epochs);
             StringBuilder sb = new StringBuilder("|");
             String info = "";
-            for (int j = 0; j < barLen; j += 4) sb.append((j <= (inc * i)) ? '█' : ' ');
+            for (int j = 0; j < BAR_LENGTH; j += 4) sb.append((j <= (inc * i)) ? '█' : ' ');
             if (print)
                 info = ", loss/epoch: " + String.format(configs.get("loss_format"), (runningLoss / trainData.size()));
             System.out.print(
@@ -107,7 +110,6 @@ public class Matcha {
             );
 
         double runningLoss = 0.;
-        int matches = 0;
         for (var sample : testData) {
 			Tensor X = sample.get(0), y = sample.get(1);
 			Tensor outputs = model.forward(X);
@@ -115,7 +117,6 @@ public class Matcha {
             runningLoss += tLoss.sum();
 		}
         
-        if (optimizer == null) throw new IllegalStateException("Error: please specify an optimizer.");
         if (!configs.get("test_loss").equals("total") && !configs.get("test_loss").equals("average"))
             throw new IllegalArgumentException(
                 "Error: config \"test_loss\" must be \"average\" or \"total\" but found \"" + configs.get("test_loss") + "\"."

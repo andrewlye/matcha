@@ -20,6 +20,11 @@ import matcha.engine.Tensor;
 
 public class MNIST extends Dataset {
     private List<List<Tensor>> samples;
+
+    public static final int DISPLAY_WIDTH = 300;
+    public static final int DISPLAY_HEIGHT = 300;
+    public static final int IMG_LENGTH = 28;
+
     public MNIST(String cache) {
         this(cache, -1, 1, true);
     }
@@ -113,10 +118,10 @@ public class MNIST extends Dataset {
 
     public void show(Tensor X, int pixelSize) {
         if (pixelSize <= 0) throw new IllegalArgumentException("Error: pixel size must be >0.");
-        if (!Arrays.equals(X.shape(), new int[]{28, 28})) 
+        if (!Arrays.equals(X.shape(), new int[]{IMG_LENGTH, IMG_LENGTH})) 
             throw new IllegalArgumentException("Error: input tensor must be of shape (28, 28).");
         JFrame frame = new JFrame();
-        frame.setSize(300, 300);
+        frame.setSize(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
         frame.add(new Digit(X, pixelSize));
         frame.setVisible(true);
@@ -131,11 +136,12 @@ class Digit extends JComponent {
         this.X = X;
         WIDTH = width;
     }
+    
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.BLUE);
-        for (int i = 0; i < 28; i++) {
-            for (int j = 0; j < 28; j++) {
+        for (int i = 0; i < MNIST.IMG_LENGTH; i++) {
+            for (int j = 0; j < MNIST.IMG_LENGTH; j++) {
                 int intensity = (int) X.get(new int[]{i, j});
                 Color c = new Color(0, 0, 0, 255 - intensity);
                 g2d.setColor(c);
