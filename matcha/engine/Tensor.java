@@ -77,7 +77,6 @@ public class Tensor implements Iterable<Double>{
 
     public Tensor(Object o, boolean gradEnabled) {
         this(LinAlg.getDims(o), LinAlg.flatten(o), gradEnabled);
-        System.out.println("Object constructor.");
     }
 
     // Private constructor used for auto differentiation and chain-ruling.
@@ -747,7 +746,7 @@ public class Tensor implements Iterable<Double>{
     public String info() {
         if (m_gradEnabled){
             if (m_gradFn != GradFunctions.None) return "Tensor(shape: " + formatShape() + ", gradFn=<" + m_gradFn + ">)";
-            else return "Tensor(shape: " + formatShape() + ", gradEnabled=true>)";
+            else return "Tensor(shape: " + formatShape() + ", gradEnabled=true)";
         } else
             return "Tensor(shape: " + formatShape() + ")";
     }

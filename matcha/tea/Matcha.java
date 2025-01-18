@@ -96,7 +96,7 @@ public class Matcha {
         
         long endTime = System.nanoTime();
         long minutes = TimeUnit.MINUTES.convert(endTime - startTime, TimeUnit.NANOSECONDS);
-        long ms = TimeUnit.MILLISECONDS.convert(endTime - startTime, TimeUnit.NANOSECONDS) - TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MILLISECONDS);
+        long ms = TimeUnit.MILLISECONDS.convert(endTime - startTime, TimeUnit.NANOSECONDS) - TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES);
         
         System.out.println("Time elapsed: " + minutes + " minutes and " + String.format("%.2f", (double) ms / 1000) + " seconds.");
     };
@@ -123,7 +123,7 @@ public class Matcha {
                 );
         
         System.out.println(
-                ((configs.get("test_loss").equals("average")) ? "average loss: " : "total loss: ")
+                ((configs.get("test_loss").equals("average")) ? "average test loss: " : "total test loss: ")
                 + String.format(
                     configs.get("loss_format"), 
                     ((configs.get("test_loss").equals("average")) ? (runningLoss / trainData.size()) : runningLoss)
