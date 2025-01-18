@@ -194,7 +194,7 @@ public final class FN_Activations {
      * @param data the data to sum along. Assumed to be stored using the same representation as the calling tensor.
      * @return an array such that the ith element contains the ith slice's sum along the specified axis in data.
      */
-    private static double[] getSumsAlong(Tensor t_A, int axis, double[] data){
+    protected static double[] getSumsAlong(Tensor t_A, int axis, double[] data){
         List<int[]> indices = getIndicesAlong(t_A, axis);
         double[] sums = new double[indices.size()];
         for(int i = 0; i < sums.length; i++){
@@ -216,11 +216,11 @@ public final class FN_Activations {
      * @param data the data to max along. Assumed to be stored using the same representation as the calling tensor.
      * @return an array such that the ith element contains the ith slice's maximum along the specified axis in data.
      */
-    private static double[] getMaxAlong(Tensor t_A, int axis){
+    protected static double[] getMaxAlong(Tensor t_A, int axis){
         List<int[]> indices = getIndicesAlong(t_A, axis);
         double[] maxes = new double[indices.size()];
         for(int i = 0; i < maxes.length; i++){
-            double max = Integer.MIN_VALUE;
+            double max = Double.NEGATIVE_INFINITY;
             int[] idx = indices.get(i);
             AxisIterator it = t_A.iterator(idx.clone(), axis);
             while(it.hasNext()) max = Math.max(max, it.next());
@@ -231,12 +231,61 @@ public final class FN_Activations {
     }
 
     /**
+     * Returns an array containing the minimum of each slice along an axis.
+     * @param t_A, the tensor to call this operation on.
+     * @param axis the axis to compute the min along.
+     * @param data the data to min along. Assumed to be stored using the same representation as the calling tensor.
+     * @return an array such that the ith element contains the ith slice's minimum along the specified axis in data.
+     */
+    protected static double[] getMinAlong(Tensor t_A, int axis){
+        List<int[]> indices = getIndicesAlong(t_A, axis);
+        double[] mins = new double[indices.size()];
+        for(int i = 0; i < mins.length; i++){
+            double min = Double.POSITIVE_INFINITY;
+            int[] idx = indices.get(i);
+            AxisIterator it = t_A.iterator(idx.clone(), axis);
+            while(it.hasNext()) min = Math.min(min, it.next());
+            mins[i] = min;
+        }
+        
+        return mins;
+    }
+
+     /**
+     * Returns an array containing the index of the maximum element of each slice along an axis. Used in softmax backpropagation.
+     * @param t_A, the tensor to call this operation on.
+     * @param axis the axis to compute the argmax along.
+     * @param data the data to argmax along. Assumed to be stored using the same representation as the calling tensor.
+     * @return an array such that the ith element contains the ith slice's maximum along the specified axis in data.
+     */
+    protected static double[] getArgmaxAlong(Tensor t_A, int axis){
+        List<int[]> indices = getIndicesAlong(t_A, axis);
+        double[] argmaxes = new double[indices.size()];
+        for(int i = 0; i < argmaxes.length; i++){
+            double max = Double.NEGATIVE_INFINITY;
+            int max_i = 0;
+            int[] idx = indices.get(i);
+            AxisIterator it = t_A.iterator(idx.clone(), axis);
+            while(it.hasNext()) {
+                double tmp = it.next();
+                if (tmp > max) {
+                    max = tmp;
+                    max_i = it.iter()-1;
+                }
+            }
+            argmaxes[i] = max_i;
+        }
+        
+        return argmaxes;
+    }
+
+    /**
      * Returns the starting points for each slice along an axis.
      * @param t_A, the tensor to call this operation on.
      * @param axis the axis to slice across.
      * @return a list of coordinates denoting the starting points for each slice.
      */
-    private static List<int[]> getIndicesAlong(Tensor t_A, int axis){
+    protected static List<int[]> getIndicesAlong(Tensor t_A, int axis){
         if (axis >= t_A.m_shape.length || axis < 0) throw new IllegalArgumentException("Error: axis " + axis + " out of bounds for shape " + t_A.formatShape() + ".");
         LinkedList<int[]> indexList = new LinkedList<>();
         insertIndicesAlong(t_A, indexList, axis, 0, new int[t_A.m_shape.length]);

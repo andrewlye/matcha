@@ -220,18 +220,94 @@ public class Tensor implements Iterable<Double>{
         return t_B;
     }
 
+    public double max() { return Arrays.stream(m_data).max().getAsDouble(); }
+
+    /**
+     * Returns the maximimums along a given axis of the tensor.
+     * Remark: gradients not supported yet.
+     */
     public Tensor max(int axis){
-        throw new UnsupportedOperationException();
+        if (axis == -1) axis = m_shape.length-1;
+        if (axis < 0 || axis >= m_shape.length) 
+            throw new IllegalArgumentException(
+                String.format("Error: axis %d out of bounds for shape %s", axis, formatShape())
+            );
+
+        double[] maxes = FN_Activations.getMaxAlong(this, axis);
+        int[] max_shape = new int[m_shape.length-1];
+        for (int i = 0, j = 0; j < m_shape.length; j++) {
+            if (j == axis) continue;
+            max_shape[i++] = m_shape[j];
+        }
+
+        return new Tensor(max_shape, maxes, false);
     }
 
+    public double min() { return Arrays.stream(m_data).min().getAsDouble(); }
+
+    /**
+     * Returns the minimums along a given axis of the tensor.
+     * Remark: gradients not supported yet.
+     */
     public Tensor min(int axis){
-        throw new UnsupportedOperationException();
+        if (axis == -1) axis = m_shape.length-1;
+        if (axis < 0 || axis >= m_shape.length) 
+            throw new IllegalArgumentException(
+                String.format("Error: axis %d out of bounds for shape %s", axis, formatShape())
+            );
+
+        double[] mins = FN_Activations.getMinAlong(this, axis);
+        int[] min_shape = new int[m_shape.length-1];
+        for (int i = 0, j = 0; j < m_shape.length; j++) {
+            if (j == axis) continue;
+            min_shape[i++] = m_shape[j];
+        }
+
+        return new Tensor(min_shape, mins, false);
+    }
+
+    /**
+     * Returns the indices of the maximimal elements along a given axis of the tensor.
+     * Remark: gradients not supported yet.
+     */
+    public Tensor argmax(int axis){
+        if (axis == -1) axis = m_shape.length-1;
+        if (axis < 0 || axis >= m_shape.length) 
+            throw new IllegalArgumentException(
+                String.format("Error: axis %d out of bounds for shape %s", axis, formatShape())
+            );
+
+        double[] argmaxes = FN_Activations.getArgmaxAlong(this, axis);
+        int[] max_shape = new int[m_shape.length-1];
+        for (int i = 0, j = 0; j < m_shape.length; j++) {
+            if (j == axis) continue;
+            max_shape[i++] = m_shape[j];
+        }
+
+        return new Tensor(max_shape, argmaxes, false);
     }
 
     public double sum() { return Arrays.stream(m_data).sum(); }
 
+     /**
+     * Returns the sums along a given axis of the tensor.
+     * Remark: gradients not supported yet.
+     */
     public Tensor sum(int axis){
-        throw new UnsupportedOperationException();
+        if (axis == -1) axis = m_shape.length-1;
+        if (axis < 0 || axis >= m_shape.length) 
+        throw new IllegalArgumentException(
+            String.format("Error: axis %d out of bounds for shape %s", axis, formatShape())
+        );
+
+        double[] sums = FN_Activations.getSumsAlong(this, axis, this.m_data);
+        int[] sum_shape = new int[m_shape.length-1];
+        for (int i = 0, j = 0; j < m_shape.length; j++) {
+            if (j == axis) continue;
+            sum_shape[i++] = m_shape[j];
+        }
+
+        return new Tensor(sum_shape, sums, false);
     }
 
     public Tensor prod(int axis){

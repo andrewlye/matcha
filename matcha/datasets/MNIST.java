@@ -17,6 +17,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import matcha.engine.Tensor;
+import matcha.utils.math.LinAlg;
 
 public class MNIST extends Dataset {
     private List<List<Tensor>> samples;
@@ -77,14 +78,9 @@ public class MNIST extends Dataset {
                     yBatchData.add(sample.get(1)[0]);
                 }
                 var sample = new ArrayList<Tensor>();
-                if (batchSize == 1) {
-                    sample.add(new Tensor(new int[]{28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
-                    sample.add(new Tensor(new int[]{1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
-                } else {
-                    sample.add(new Tensor(new int[]{yBatchData.size(), 28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
-                    sample.add(new Tensor(new int[]{yBatchData.size(), 1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
-                }
-                
+
+                sample.add(new Tensor(new int[]{yBatchData.size(), 28, 28}, XBatchData.stream().mapToDouble(x -> x).toArray()));
+                sample.add(new Tensor(new int[]{yBatchData.size(), 1}, yBatchData.stream().mapToDouble(x -> x).toArray()));
                 samples.add(sample);
             }
         } catch (IOException e) {
@@ -102,11 +98,6 @@ public class MNIST extends Dataset {
 
     private void reshape(boolean isX, int... shape) {
         int k = (isX) ? 0 : 1;
-        if (batchSize == 1) {
-            for (var sample : samples) sample.get(k).reshape(shape);
-            return;
-        }
-
         for (var sample : samples) {
             int[] bShape = new int[shape.length+1];
             bShape[0] = sample.get(k).shape()[0];
@@ -127,9 +118,10 @@ public class MNIST extends Dataset {
         return samples.size();
     }
 
-    public void show(Tensor X) { show(X, 25); }
+    public void show(int i) { show(samples.get(i).get(0), 25); }
+    public void show(int i, int pixelSize) { show(samples.get(i).get(0), pixelSize); }
 
-    public void show(Tensor X, int pixelSize) {
+    private void show(Tensor X, int pixelSize) {
         if (pixelSize <= 0) throw new IllegalArgumentException("Error: pixel size must be >0.");
         if (X.size() != IMG_LENGTH * IMG_LENGTH) throw new IllegalArgumentException("Error: input tensor must be a single 784-element tensor.");
         JFrame frame = new JFrame();
@@ -154,7 +146,8 @@ class Digit extends JComponent {
         g2d.setColor(Color.BLUE);
         for (int i = 0; i < MNIST.IMG_LENGTH; i++) {
             for (int j = 0; j < MNIST.IMG_LENGTH; j++) {
-                int intensity = (int) X.get(i, j);
+                int k = LinAlg.rmo(new int[]{MNIST.IMG_LENGTH, MNIST.IMG_LENGTH}, new int[]{i, j});
+                int intensity = (int) X.data()[k];
                 Color c = new Color(0, 0, 0, 255 - intensity);
                 g2d.setColor(c);
                 g2d.fillRect(j * WIDTH, i * WIDTH, WIDTH, WIDTH);

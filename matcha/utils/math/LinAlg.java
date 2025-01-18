@@ -99,6 +99,8 @@ public class LinAlg {
         return rmo;
     }
 
+    public static double[] arange(int n) { return arange(0, n-1, 1); }
+
     public static double[] arange(double start, double end, double step){
         if (step == 0) throw new IllegalArgumentException("Error: step cannot be 0.");
         if (end < start && step > 0) throw new IllegalArgumentException("Error: step cannot be > 0 if end < start.");
