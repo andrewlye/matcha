@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="https://github.com/andrewlye/matcha/blob/main/img/logo.png?raw=true"/>
+</p>
+<!-- credit: vecteezy -->
+
 # matcha :tea::herb:
 *Neural networks in Java.*
 
@@ -26,7 +31,10 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 In large, matcha comprises two utilities: efficient N-d tensor computations and building large-scale modular neural networks. It serves as a standalone library that does not require any additional dependencies other than a satisfactory Java version (17+).
 
 ### Tensors
-![](img/tensorimg.png) 
+<p align="center">
+  <img src="https://github.com/andrewlye/matcha/blob/main/img/tensorimg.jpg?raw=true"/>
+</p>
+
 matcha provides numerous functions to initialize, visualize, and efficiently operate on tensors (or N-dimensional arrays), which store a single array of doubles as the underlying datatype. As a result, all of the data stored in a Tensor object is contiguous in memory.
 #### Initializing a tensor.
 Tensors can be zero-initialized by specifying a shape
