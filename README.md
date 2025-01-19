@@ -198,7 +198,7 @@ double[][] arr = (double[][]) Tensors.toArray(t_a.matmul(t_b));
 ```
 
 ### Automatic Differentiation
-Automatic differentiation and the calculation of gradients can easily be enabled on any tensor either by adding `true` as the last parameter its contructor or by calling `t.withGrad(true)`. Similar to PyTorch, gradient chaining is computed by maintaining a list of child tensors so that their computation can be done automatically with a single call to the parent tensor. Also, the enabling of gradients propagates through operations, so that any operation that involves at least one tensor with gradients enabled will output a tensor that also has gradients enabled and mark the previous tensor as one of its children.
+Automatic differentiation and the calculation of gradients can easily be enabled on any tensor either by adding `true` as the last parameter in its contructor or by calling `t.withGrad(true)`. Similar to PyTorch, gradient chaining is computed by maintaining a list of child tensors so that their computation can be done automatically with a single call to the parent tensor. Also, the enabling of gradients propagates through operations, so that any operation that involves at least one tensor with gradients enabled will output a tensor that also has gradients enabled and mark the previous tensor as one of its children.
 ```Java
 Tensor t_a = new Tensor(new int[][]{
     {7, 2},
