@@ -340,7 +340,7 @@ Generally, adding a neural network layer consists of the following:
 |:-:|:-:|
 <p align=center><b>Fig 1.</b> Example model outputs for given samples (left) and the loss curve during training (right).</p>
 
-The Modified National Institute of Standards and Technology (MNIST) dataset consists of 60,000 training and 10,000 testing images of handwritten numeric, and is widely used for to train and test a wide variety machine learning models. In this example, we demonstrate how to train a neural network with around 250,000 parameters on a sizeable subset of MNIST. Training took 30 minutes on an Apple M1 Pro model, and achieved a test accuracy of 95.30%. To replicate this code, please download the dataset [here](https://www.kaggle.com/datasets/oddrationale/mnist-in-csv/data).
+The Modified National Institute of Standards and Technology (MNIST) dataset consists of 60,000 training and 10,000 testing images of handwritten numeric digits, and is widely used for to train and test a variety of machine learning models. In this example, we demonstrate how to train a neural network with around 250,000 parameters on a sizeable subset of MNIST. Training the model took just under 30 minutes on an Apple M1 Pro, and achieved a test accuracy of 95.30%. To replicate this code, please download the dataset [here](https://www.kaggle.com/datasets/oddrationale/mnist-in-csv/data).
 
 ### Code
 ```Java
