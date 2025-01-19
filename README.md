@@ -10,6 +10,17 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 - `matcha.tea`: Automates training of neural networks.
 - `matcha.utils`: Plotting, tensor visualizations, and more!
 
+<!-- toc -->
+## Quick Links
+- [Features](#features)
+  - [Tensors](#tensors)
+  - [Automatic Differentiation](#automatic-differentiation)
+  - [Neural Networks](#neural-networks)
+  - [Modularity and Extensibility](#modularity-and-extensibility)
+  - [Open Issues](#open-issues)
+- [Example: MNIST](#example:-k
+<!-- tocstop -->
+
 ## Features
 In large, matcha comprises two utilities: efficient N-d tensor computations and building large-scale modular neural networks. It serves as a standalone library that does not require any additional dependencies other than a satisfactory Java version (17+).
 
