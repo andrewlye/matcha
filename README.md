@@ -1,4 +1,4 @@
-# matcha
+# matcha :tea::herb:
 *Neural networks in Java.*
 
 ## Overview
