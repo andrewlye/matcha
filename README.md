@@ -26,6 +26,7 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 In large, matcha comprises two utilities: efficient N-d tensor computations and building large-scale modular neural networks. It serves as a standalone library that does not require any additional dependencies other than a satisfactory Java version (17+).
 
 ### Tensors
+![](img/tensorimg.png) 
 matcha provides numerous functions to initialize, visualize, and efficiently operate on tensors (or N-dimensional arrays), which store a single array of doubles as the underlying datatype. As a result, all of the data stored in a Tensor object is contiguous in memory.
 #### Initializing a tensor.
 Tensors can be zero-initialized by specifying a shape
