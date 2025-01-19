@@ -377,7 +377,7 @@ public class MNISTExample {
         // we optimize via traditional gradient descent.
         Optimization optim = new SGD(model.parameters(), learning_rate);
 
-		System.out.println("Starting training...");
+	System.out.println("Starting training...");
         for (int i = 1; i <= n_epochs; i++) {
             double running_loss = 0.;
             for (var sample : train_data) {
