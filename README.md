@@ -330,7 +330,7 @@ Generally, adding a neural network layer consists of the following:
 - Some tensor operations, like matrix multiplication, are not supported in higher (n > 2) dimensions. This is mainly because there is no unified framework to broadcast or slice tensors yet, apart from AxisIterators.
 - Many tensor operations are still awaiting a multithreaded counterpart.
 - The plotting mini-library JPlot (in `matcha.utils`) is largely unfinished due to relevance. However, it has a strong backbone and would serve well as the base for a more comprehensive separate library.
-- Tensors only store doubles and do not support templating so that the underlying datatype remains primitive. Thus, there does not currently exist tensors that support storing floats, ints, etc.
+- Tensors only store doubles and do not support templating so that the underlying datatype remains primitive. Thus, there does not currently exist tensors that support storing floats, ints, etc., and models cannot be quantized.
 - Tensors with numbers of different widths can print in a staggered fashion that no longer looks very clean. This can temporarily be solved by changing the DEFAULT_FORMAT field in `utils.Tensors`, but it would be nice if this format could dynamically adjust so that all calls to print a tensor will format nicely.
 - Adding more optimization algorithms, such as Adam, Adagrad, or momentum-based SGD.
 - Adding more neural network modules, such as convolutional and pooling layers.
