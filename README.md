@@ -11,9 +11,10 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
 - `matcha.utils`: Plotting, tensor visualizations, and more!
 
 ## Features
-In large, matcha comprises two utilities: efficient N-d tensor computations and building large-scale modular neural networks. It serves as a standalone library that does not require any additional dependencies other than a satisfactory Java version.
+In large, matcha comprises two utilities: efficient N-d tensor computations and building large-scale modular neural networks. It serves as a standalone library that does not require any additional dependencies other than a satisfactory Java version (17+).
+
 ### Tensors
-matcha provides numerous functions to initialize, visualize, and efficiently operate on tensors (or N-dimensinal arrays), which stores a single array of doubles as the underlying datatype. As a result, all of the data stored in a Tensor object is contiguous.
+matcha provides numerous functions to initialize, visualize, and efficiently operate on tensors (or N-dimensional arrays), which store a single array of doubles as the underlying datatype. As a result, all of the data stored in a Tensor object is contiguous in memory.
 #### Initializing a tensor.
 Tensors can be zero-initialized by specifying a shape
 ```Java
@@ -64,7 +65,7 @@ Tensor(shape: (2, 2, 3))
    10.0,  11.0,  12.0]]
 ```
 #### Tensor operations.
-Tensors support many useful and computationally fast operations. For example, one can easily construct a incrementally-filled tensor by reshaping it
+Tensors support many useful and computationally fast operations. For example, one can easily construct a incrementally-filled tensor by reshaping
 ```Java
 Tensor t = new Tensor(LinAlg.arange(12));
 t.reshape(2, 2, 3);
@@ -176,7 +177,7 @@ double[][] arr = (double[][]) Tensors.toArray(t_a.matmul(t_b));
 ```
 
 ### Automatic Differentiation
-Automatic differentiation and the calculation of gradients can easily be enabled on any tensor either by adding `true` as the last parameter its contructor or by calling `t.withGrad(true)`. Similar to PyTorch, gradient chaining is computed by maintaining a list of child tensors so that their computation can be done automatically with a single call to the parent tensor. Also, the enabling of gradients propagates through operations, so that any operation that involves at least one tensor with gradients enabled will also have gradients enabled and that tensor marked as one of its children.
+Automatic differentiation and the calculation of gradients can easily be enabled on any tensor either by adding `true` as the last parameter its contructor or by calling `t.withGrad(true)`. Similar to PyTorch, gradient chaining is computed by maintaining a list of child tensors so that their computation can be done automatically with a single call to the parent tensor. Also, the enabling of gradients propagates through operations, so that any operation that involves at least one tensor with gradients enabled will output a tensor that also has gradients enabled and mark the previous tensor as one of its children.
 ```Java
 Tensor t_a = new Tensor(new int[][]{
     {7, 2},
@@ -197,6 +198,7 @@ Tensor(shape: (2, 2), gradEnabled=true)
    7.0,   0.0]
 ```
 ```Java
+// set gradient to 1 and compute child gradients.
 t_c.backward();
 System.out.println(Tensors.showGrad(t_a));
 ```
@@ -204,9 +206,104 @@ System.out.println(Tensors.showGrad(t_a));
 [ 11.0,   3.0, 
    3.0,   5.0]
 ```
+
 ### Neural Networks
+Built on top of its tensor and differentiation engine, `matcha.nn` provides modular components to build deep neural networks, such as popular activation layers (e.g. ReLU, tanh), outputs layers (e.g. softmax), and loss functions (e.g. MSE for regression, log loss for classification).
+```Java
+Sequential model = new Sequential(
+	new Linear(42, 64),
+	new ReLU(),
+	new Linear(64, 64),
+	new ReLU(),
+	new Linear(64, 1)
+);
+
+System.out.println(model);
+```
+```
+Sequential(
+   Linear(in_features=42, out_features=64, bias=true)
+   ReLU()
+   Linear(in_features=64, out_features=64, bias=true)
+   ReLU()
+   Linear(in_features=64, out_features=1, bias=true)
+)
+```
+```Java
+Tensor x = new Tensor(1, 42);
+System.out.println(model.forward(x));
+```
+```
+[ -0.1]
+```
 
 ### Modularity and Extensibility
+matcha is designed to be easily extensible so that adding new neural network layers, tensor operations, and loss functions is easy. Many of the fields and methods in the Tensor class are protected instead of private, so that they can be shared with any classes implemented in `engine`. This allows the organization of functions that provide separate utilities to be cleanly separated and organized into their own files instead of being dumped into a single massive Tensor file (these files start with `FN_` and are largely static). As an example, N-d softmax is implemented as a static method in `engine.FN_Activations`, which is then be used to create a softmax layer by simply calling this method on an input tensor.
+
+Generally, adding a neural network layer consists of the following:
+1. Writing a function in `matcha.engine` and specifying the function to be static:
+  ```Java
+  public static Tensor tanh(Tensor t_A) { ...
+  ```
+2. Computing the data stored in the output tensor:
+  ```Java
+  double[] dOut = Arrays.stream(t_A.m_data).map(x -> Math.tanh(x)).toArray();
+  ```
+3. Checking if any of the input tensors have gradients enabled and marking them as children:
+  ```Java
+  if (t_A.m_gradEnabled) {
+  	List<Tensor> children = new ArrayList<>();
+  	children.add(t_A);
+  
+    	// t_B is the output tensor (i.e. t_B = tanh(t_A)).
+  	t_B = new Tensor(t_A.m_shape, dOut, t_A.m_gradEnabled, children);
+  	...
+  ```
+4. Writing the lambda backpropagation calculation on the input tensor assuming the output tensor's gradients are known:
+  ```Java
+  	// ddx tanh(x) = 1 - tanh^2(x)
+  	Backward back = () -> {
+  		for(int i = 0; i < t_A.m_grad.length; i++){
+  			 t_A.m_grad[i] += (1-(t_B.m_data[i]*t_B.m_data[i])) * t_B.m_grad[i];
+  		}
+  	};
+  ```
+5. Setting the `backward` attribute of the output tensor to the lambda function and (optionally) specifying the backpropagation function:
+  ```Java
+  	t_B.m_backward = back;
+  	t_B.m_gradFn = GradFunctions.TanhBackward;
+  ```
+6. If no gradient calculations are needed, then we can construct the output tensor without worrying about children of backpropagation functions:
+  ```Java
+  } else {
+  	t_B = new Tensor(t_A.m_shape, dOut);
+  }
+
+  return t_B;
+  ```
+7. Finally, adding a new class into `matcha.nn`, implement `Module`, and call the method we implemented:
+  ```Java
+  public class Tanh implements Module{
+
+  	@Override
+  	public Tensor forward(Tensor x){
+		return FN_Activations.tanh(x);
+  	}
+
+
+  	@Override
+  	public String toString(){
+  		return "Tanh()";
+    	}
+
+  	@Override
+  	public List<Tensor> parameters(){
+  		return null;
+  	}
+  }
+  ```
+
+
 ### Open Issues
 - There is currently no way to save or load state dicts/models like in PyTorch.
 - Some tensor operations, like matrix multiplication, are not supported in higher (n > 2) dimensions. This is mainly because there is no unified framework to broadcast or slice tensors yet, apart from AxisIterators.
@@ -291,7 +388,7 @@ public class MNISTExample {
         // next, we measure test accuracy.
         int n_correct = 0;
 
-		System.out.println("Starting testing...");
+	System.out.println("Starting testing...");
         for (var sample : test_data) {
             Tensor X = sample.get(0), y = sample.get(1);
 
