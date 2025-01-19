@@ -504,6 +504,7 @@ Here is a simple example of a Multi-Layer Perceptron built entirely in matcha tr
 </details>
 <details>
     <summary>Code</summary>
+	
 ### Code
 ```Java
 import matcha.datasets.toy.SineWave;
