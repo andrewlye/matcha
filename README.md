@@ -315,7 +315,7 @@ Generally, adding a neural network layer consists of the following:
 - Adding more neural network modules, such as convolutional and pooling layers.
   
 ## Example: k-Classification on MNIST
-![](img/mnistpreds.png) | ![](img/mnistpreds.png)
+![](img/mnistpreds.png) | ![](img/mnistloss.png)
 |:-:|:-:|
 <p align=center><b>Fig 1.</b> Example model outputs for given samples (left) and the loss curve during training (right).</p>
 
