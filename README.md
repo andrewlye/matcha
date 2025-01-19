@@ -302,7 +302,7 @@ Generally, adding a neural network layer consists of the following:
 
   return t_B;
   ```
-7. Finally, adding a new class into `matcha.nn`, implement `Module`, and call the method we implemented:
+7. Adding a new class into `matcha.nn` which implements `Module` and calls the method:
   ```Java
   public class Tanh implements Module{
 
