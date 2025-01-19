@@ -18,8 +18,8 @@ A standalone, simple yet powerful neural networks library and tensor engine buil
   - [Neural Networks](#neural-networks)
   - [Modularity and Extensibility](#modularity-and-extensibility)
   - [Open Issues](#open-issues)
-- [Example: MNIST](#example:-k-classification-on-mnist)
-- [Example: Regression](#example:-regression-on-sine-wave-dataset)
+- [Example: MNIST](#example-k-classification-on-mnist)
+- [Example: Regression](#example-regression-on-sine-wave-dataset)
 <!-- tocstop -->
 
 ## Features
