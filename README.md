@@ -57,11 +57,15 @@ or with a shape and the (flattened) data to store.
 int[] shape = {2, 3};
 double[] data = {1, 2, 3, 4, 5, 6};
 Tensor t = new Tensor(shape, data);
+
+t.get(1, 1)
 ```
 ```
 Tensor(shape: (2, 3))
 [  1.0,   2.0,   3.0, 
    4.0,   5.0,   6.0]
+
+5.0
 ```
 For ease of use, Tensors can also be constructed from any numerical array, of which it will automatically infer the shape of. Note that due to the constructors above, there is one exception: a Tensor constructed from an 1d array of ints will assume that the array specifies its shape and _not_ its data.
 ```Java
