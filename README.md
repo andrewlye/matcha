@@ -77,6 +77,8 @@ int[][][] arr = {
 };
 
 Tensor t = new Tensor(arr);
+
+t.get(1, 0, 2)
 ```
 ```
 Tensor(shape: (2, 2, 3))
@@ -84,6 +86,8 @@ Tensor(shape: (2, 2, 3))
     4.0,   5.0,   6.0],
  [  7.0,   8.0,   9.0, 
    10.0,  11.0,  12.0]]
+
+9.0
 ```
 #### Tensor operations.
 Tensors support many useful and computationally fast operations. For example, one can easily construct a incrementally-filled tensor by reshaping
