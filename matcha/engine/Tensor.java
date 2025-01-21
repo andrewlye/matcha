@@ -677,6 +677,15 @@ public class Tensor implements Iterable<Double>{
      * @return the element stored at tensor index idx.
      */
     public double get(int... idxs) {
+        if (idxs.length != m_shape.length) throw new IllegalArgumentException(
+                String.format("Error: number of indices must match shape of %s.", formatShape())
+            );
+
+        for (int k = 0; k < idxs.length; k++) {
+            if (idxs[k] >= m_shape[k]) throw new IllegalArgumentException(
+                String.format("Error: index %d at dimension %d invalid for shape of %s.", idxs[k], k, formatShape())
+            );
+        }
         return m_data[storageIndex(idxs)];
     }
 
