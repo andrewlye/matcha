@@ -453,41 +453,41 @@ import matcha.nn.*;
 import matcha.tea.Matcha;
 
 class MNISTExample {
-  public static void main(String[] args) {
-      Sequential model = new Sequential(
-          new Linear(784, 256),
-          new ReLU(),
-          new Linear(256, 256),
-          new ReLU(),
-          new Linear(256, 10),
-          new Softmax(-1) // softmax across the last dimension.
-      );
+    public static void main(String[] args) {
+        Sequential model = new Sequential(
+            new Linear(784, 256),
+            new ReLU(),
+            new Linear(256, 256),
+            new ReLU(),
+            new Linear(256, 10),
+            new Softmax(-1) // softmax across the last dimension.
+        );
 
-      String train_file = "~/path/to/mnist_train.csv", test_file = "~/path/to/mnist_test.csv";
-      int train_samples = 10_000, test_samples = 1000;
-      int batch_size = 4;
-      int n_epochs = 35;
+        String train_file = "~/path/to/mnist_train.csv", test_file = "~/path/to/mnist_test.csv";
+        int train_samples = 10_000, test_samples = 1000;
+        int batch_size = 4;
+        int n_epochs = 35;
 
-      MNIST train_data = new MNIST(train_file, train_samples, batch_size);
-      // shape of data is by default (batch_size, 28, 28).
-      train_data.reshapeX(784);
-      MNIST test_data = new MNIST(test_file, test_samples);
-      test_data.reshapeX(784);
-      
-      Loss loss_fn = new LogLoss();
+        MNIST train_data = new MNIST(train_file, train_samples, batch_size);
+        // shape of data is by default (batch_size, 28, 28).
+        train_data.reshapeX(784);
+        MNIST test_data = new MNIST(test_file, test_samples);
+        test_data.reshapeX(784);
+        
+        Loss loss_fn = new LogLoss();
 
-      // initialize matcha module.
-      Matcha matcha = new Matcha(model, train_data, loss_fn);
-      
-      // train model.
-      matcha.brew(n_epochs);
-      
-      // plot loss curve.
-      matcha.plot();
-          
-      // test model performance.
-      matcha.sip(test_data);
-    }
+        // initialize matcha module.
+        Matcha matcha = new Matcha(model, train_data, loss_fn);
+        
+        // train model.
+        matcha.brew(n_epochs);
+        
+        // plot loss curve.
+        matcha.plot();
+            
+        // test model performance.
+        matcha.sip(test_data);
+      }
 }
 ```
 ```
