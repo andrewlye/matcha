@@ -1,6 +1,6 @@
-<p align="center">
+<!-- <p align="center">
   <img src="https://github.com/andrewlye/matcha/blob/main/img/logo.png?raw=true"/>
-</p>
+</p> -->
 <!-- credit: vecteezy -->
 
 # matcha :tea::herb:
